@@ -1,0 +1,622 @@
+Setting variable: eV=0.0000000000016000000000000000485979929014
+Setting variable: planckConstant=0.0000000000000000000000000010545718
+Setting function: Block=(0.5 * (sign((x - xmin)) + sign((xmax - x))))
+Setting variable: MatrixSize_X=128
+Setting variable: MatrixSize_Y=4
+Setting variable: MatrixSize_Z=4
+Setting variable: Wavelength=0.0000800000000000000065442443131225047637
+Setting variable: Omega=2354564459136066
+Setting variable: Amp=1100
+Setting variable: k=78539.816339744822471402585506439208984375
+Setting variable: StepsPerPeriod=200
+Setting variable: TimeStep=0.0000000000000000133425638079260829967149
+Setting variable: IterationsNumber=2
+Setting variable: RSize=0.0000800000000000000065442443131225047637
+Setting variable: X_Min=-0.0000400000000000000032721221565612523818
+Setting variable: X_Max=0.0000400000000000000032721221565612523818
+Setting variable: Y_Min=-0.0000400000000000000032721221565612523818
+Setting variable: Y_Max=0.0000400000000000000032721221565612523818
+Setting variable: Z_Min=-0.0000400000000000000032721221565612523818
+Setting variable: Z_Max=0.0000400000000000000032721221565612523818
+Setting variable: Size_X=0.0000800000000000000065442443131225047637
+Setting variable: Size_Y=0.0000800000000000000065442443131225047637
+Setting variable: Size_Z=0.0000800000000000000065442443131225047637
+Setting variable: Step_X=0.0000006250000000000000511269086962695685
+Setting variable: Step_Y=0.0000200000000000000016360610782806261909
+Setting variable: Step_Z=0.0000200000000000000016360610782806261909
+Setting variable: CellVol=0.0000000000000002500000000000000687301565
+Setting variable: NumParticles=250000
+Setting variable: PlasmaXMin=-0.0000400000000000000032721221565612523818
+Setting variable: PlasmaXMax=0.0000400000000000000032721221565612523818
+Setting variable: PlasmaYMin=-0.0000400000000000000032721221565612523818
+Setting variable: PlasmaYMax=0.0000400000000000000032721221565612523818
+Setting variable: PlasmaZMin=-0.0000400000000000000032721221565612523818
+Setting variable: PlasmaZMax=0.0000400000000000000032721221565612523818
+Setting variable: PlasmaVolume=0.0000000000005120000000000001407593606051
+Setting variable: Density=1
+Setting variable: ParticlesFactor=0.0000000000000000020480000000000005810087
+Setting variable: RelField=133871815.230632781982421875
+Setting module: Module-'PresetFields'
+Setting function: PresetFields.Ex=0
+Setting function: PresetFields.Ey=((147258996753.696044921875 * cos((78539.816339744822471402585506439208984375 * x))) * sin((2354564459136066 * t)))
+Setting function: PresetFields.Ez=((147258996753.696044921875 * cos((78539.816339744822471402585506439208984375 * x))) * cos((2354564459136066 * t)))
+Setting function: PresetFields.Bx=0
+Setting function: PresetFields.By=((-147258996753.696044921875 * sin((78539.816339744822471402585506439208984375 * x))) * sin((2354564459136066 * t)))
+Setting function: PresetFields.Bz=((-147258996753.696044921875 * sin((78539.816339744822471402585506439208984375 * x))) * cos((2354564459136066 * t)))
+Setting variable: PresetFields.replaceInterpolation=0
+Setting module: Module-'CurrentDeposition'
+Setting string: CurrentDeposition.type=Disabled
+Setting module: Add_particles-'Electron'
+Setting variable: Electron.charge=-0.0000000004803204269999999705180189904302
+Setting variable: Electron.mass=0.000000000000000000000000000910938215
+Setting function: Electron.distribution=(((1 * (((0.5 * (sign((x - (-0.0000400000000000000032721221565612523818))) + sign((0.0000400000000000000032721221565612523818 - x))))))) * (((0.5 * (sign((y - (-0.0000400000000000000032721221565612523818))) + sign((0.0000400000000000000032721221565612523818 - y))))))) * (((0.5 * (sign((z - (-0.0000400000000000000032721221565612523818))) + sign((0.0000400000000000000032721221565612523818 - z)))))))
+Setting function: Electron.initialTemperature=0
+Setting variable: Electron.factor=0.0000000000000000020480000000000005810087
+Setting module: Add_particles-'Positron'
+Setting variable: Positron.charge=0.0000000004803204269999999705180189904302
+Setting variable: Positron.mass=0.000000000000000000000000000910938215
+Setting function: Positron.distribution=(((((1 * (((0.5 * (sign((x - (-0.0000400000000000000032721221565612523818))) + sign((0.0000400000000000000032721221565612523818 - x))))))) * (((0.5 * (sign((y - (-0.0000400000000000000032721221565612523818))) + sign((0.0000400000000000000032721221565612523818 - y))))))) * (((0.5 * (sign((z - (-0.0000400000000000000032721221565612523818))) + sign((0.0000400000000000000032721221565612523818 - z)))))))))
+Setting function: Positron.initialTemperature=0
+Setting variable: Positron.factor=0.0000000000000000020480000000000005810087
+Setting module: Add_particles-'Photon'
+Setting variable: Photon.charge=0
+Setting variable: Photon.mass=0.000000000000000000000000000910938215
+Setting function: Photon.distribution=0
+Setting function: Photon.initialTemperature=0
+Setting variable: Photon.factor=0.0000000000000000020480000000000005810087
+Setting module: Module-'ParticleBC'
+Setting string: ParticleBC.x=periodic
+Setting string: ParticleBC.y=periodic
+Setting string: ParticleBC.z=periodic
+Setting module: Module-'QED_AdaptiveEventGenerator'
+Setting variable: QED_AdaptiveEventGenerator.DomainResamplingThreshold=-1
+Setting variable: QED_AdaptiveEventGenerator.CellResamplingThreshold=-1
+Setting variable: QED_AdaptiveEventGenerator.IterationResamplingThreshold=-1
+Setting variable: QED_AdaptiveEventGenerator.RemovePhotonsBelow=0.0000016374208764810453717688295410814803
+Setting module: ParticleThinout-'ParticleThinoutElectron'
+Setting string: ParticleThinoutElectron.type=Electron
+Setting variable: ParticleThinoutElectron.limit=1000000
+Setting module: ParticleThinout-'ParticleThinoutPositron'
+Setting string: ParticleThinoutPositron.type=Positron
+Setting variable: ParticleThinoutPositron.limit=1000000
+Setting module: ParticleThinout-'ParticleThinoutPhoton'
+Setting string: ParticleThinoutPhoton.type=Photon
+Setting variable: ParticleThinoutPhoton.limit=1000000
+Setting variable: IfBasicOutputIsNeeded=1
+Setting variable: IfBOPicsIsNeeded=1
+Setting variable: IfBODataIsNeeded=1
+Setting variable: BOIterationPass=1
+Setting variable: BOWidth=800
+Setting variable: BOHeight=640
+Setting string: BODataFormat=txt
+Setting module: BO_Density-'Electron1Dx'
+Setting variable: Electron1Dx.dim=1
+Setting string: Electron1Dx.type=Electron
+Setting variable: Electron1Dx.SetMatrixSize_0=128
+Setting variable: Electron1Dx.SetBounds_0=-0.0000400000000000000032721221565612523818
+Setting variable: Electron1Dx.SetBounds_1=0.0000400000000000000032721221565612523818
+Setting function: Electron1Dx.x=x
+Setting function: Electron1Dx.Weight=249999999999999.9375
+Setting variable: Electron1Dx.SetPosition_0=2
+Setting variable: Electron1Dx.SetPosition_1=2
+Setting variable: Electron1Dx.SetPosition_2=0
+Setting string: Electron1Dx.Color=BbcyrR
+Setting module: BO_Axis-'Electron1DxAxis'
+Setting variable: Electron1DxAxis.SetPosition_0=2
+Setting variable: Electron1DxAxis.SetPosition_1=2
+Setting variable: Electron1DxAxis.SetPosition_2=0
+Setting string: Electron1DxAxis.Range_0_0=x
+Setting variable: Electron1DxAxis.Range_0_1=-0.0000400000000000000032721221565612523818
+Setting variable: Electron1DxAxis.Range_0_2=0.0000400000000000000032721221565612523818
+Setting string: Electron1DxAxis.Label_0_0=x
+Setting string: Electron1DxAxis.Label_0_1=x
+Setting string: Electron1DxAxis.Label_1_0=y
+Setting string: Electron1DxAxis.Label_1_1=Ne
+Setting string: Electron1DxAxis.AdjustRanges=Electron1Dx
+Setting string: Electron1DxAxis.Colorbar_0=BbcyrR
+Setting string: Electron1DxAxis.AdjustColorbarRanges=Electron1Dx
+Setting module: BO_Density-'Electron1Dy'
+Setting variable: Electron1Dy.dim=1
+Setting string: Electron1Dy.type=Electron
+Setting variable: Electron1Dy.SetMatrixSize_0=4
+Setting variable: Electron1Dy.SetBounds_0=-0.0000400000000000000032721221565612523818
+Setting variable: Electron1Dy.SetBounds_1=0.0000400000000000000032721221565612523818
+Setting function: Electron1Dy.x=y
+Setting function: Electron1Dy.Weight=7812499999999.998046875
+Setting variable: Electron1Dy.SetPosition_0=2
+Setting variable: Electron1Dy.SetPosition_1=2
+Setting variable: Electron1Dy.SetPosition_2=2
+Setting string: Electron1Dy.Color=BbcyrR
+Setting module: BO_Axis-'Electron1DyAxis'
+Setting variable: Electron1DyAxis.SetPosition_0=2
+Setting variable: Electron1DyAxis.SetPosition_1=2
+Setting variable: Electron1DyAxis.SetPosition_2=2
+Setting string: Electron1DyAxis.Range_0_0=x
+Setting variable: Electron1DyAxis.Range_0_1=-0.0000400000000000000032721221565612523818
+Setting variable: Electron1DyAxis.Range_0_2=0.0000400000000000000032721221565612523818
+Setting string: Electron1DyAxis.Label_0_0=x
+Setting string: Electron1DyAxis.Label_0_1=y
+Setting string: Electron1DyAxis.Label_1_0=y
+Setting string: Electron1DyAxis.Label_1_1=Ne
+Setting string: Electron1DyAxis.AdjustRanges=Electron1Dy
+Setting string: Electron1DyAxis.Colorbar_0=BbcyrR
+Setting string: Electron1DyAxis.AdjustColorbarRanges=Electron1Dy
+Setting module: BO_Density-'Positron1Dx'
+Setting variable: Positron1Dx.dim=1
+Setting string: Positron1Dx.type=Positron
+Setting variable: Positron1Dx.SetMatrixSize_0=128
+Setting variable: Positron1Dx.SetBounds_0=-0.0000400000000000000032721221565612523818
+Setting variable: Positron1Dx.SetBounds_1=0.0000400000000000000032721221565612523818
+Setting function: Positron1Dx.x=x
+Setting function: Positron1Dx.Weight=249999999999999.9375
+Setting variable: Positron1Dx.SetPosition_0=2
+Setting variable: Positron1Dx.SetPosition_1=2
+Setting variable: Positron1Dx.SetPosition_2=1
+Setting string: Positron1Dx.Color=BbcyrR
+Setting module: BO_Axis-'Positron1DxAxis'
+Setting variable: Positron1DxAxis.SetPosition_0=2
+Setting variable: Positron1DxAxis.SetPosition_1=2
+Setting variable: Positron1DxAxis.SetPosition_2=1
+Setting string: Positron1DxAxis.Range_0_0=x
+Setting variable: Positron1DxAxis.Range_0_1=-0.0000400000000000000032721221565612523818
+Setting variable: Positron1DxAxis.Range_0_2=0.0000400000000000000032721221565612523818
+Setting string: Positron1DxAxis.Label_0_0=x
+Setting string: Positron1DxAxis.Label_0_1=x
+Setting string: Positron1DxAxis.Label_1_0=y
+Setting string: Positron1DxAxis.Label_1_1=Npos
+Setting string: Positron1DxAxis.AdjustRanges=Positron1Dx
+Setting string: Positron1DxAxis.Colorbar_0=BbcyrR
+Setting string: Positron1DxAxis.AdjustColorbarRanges=Positron1Dx
+Setting module: BO_Density-'Photon1Dx'
+Setting variable: Photon1Dx.dim=1
+Setting string: Photon1Dx.type=Photon
+Setting variable: Photon1Dx.SetMatrixSize_0=128
+Setting variable: Photon1Dx.SetBounds_0=-0.0000400000000000000032721221565612523818
+Setting variable: Photon1Dx.SetBounds_1=0.0000400000000000000032721221565612523818
+Setting function: Photon1Dx.x=x
+Setting function: Photon1Dx.Weight=249999999999999.9375
+Setting variable: Photon1Dx.SetPosition_0=2
+Setting variable: Photon1Dx.SetPosition_1=2
+Setting variable: Photon1Dx.SetPosition_2=3
+Setting string: Photon1Dx.Color=BbcyrR
+Setting module: BO_Axis-'Photon1DxAxis'
+Setting variable: Photon1DxAxis.SetPosition_0=2
+Setting variable: Photon1DxAxis.SetPosition_1=2
+Setting variable: Photon1DxAxis.SetPosition_2=3
+Setting string: Photon1DxAxis.Range_0_0=x
+Setting variable: Photon1DxAxis.Range_0_1=-0.0000400000000000000032721221565612523818
+Setting variable: Photon1DxAxis.Range_0_2=0.0000400000000000000032721221565612523818
+Setting string: Photon1DxAxis.Label_0_0=x
+Setting string: Photon1DxAxis.Label_0_1=x
+Setting string: Photon1DxAxis.Label_1_0=y
+Setting string: Photon1DxAxis.Label_1_1=Nph
+Setting string: Photon1DxAxis.AdjustRanges=Photon1Dx
+Setting string: Photon1DxAxis.Colorbar_0=BbcyrR
+Setting string: Photon1DxAxis.AdjustColorbarRanges=Photon1Dx
+Setting module: BO_Field-'Ey1D'
+Setting variable: Ey1D.dim=1
+Setting variable: Ey1D.SetMatrixSize_0=128
+Setting variable: Ey1D.SetBounds_0=-0.0000400000000000000032721221565612523818
+Setting variable: Ey1D.SetBounds_1=0.0000400000000000000032721221565612523818
+Setting variable: Ey1D.SetValues_0=-1100
+Setting variable: Ey1D.SetValues_1=1100
+Setting function: Ey1D.X=x
+Setting function: Ey1D.Y=0
+Setting function: Ey1D.Z=0
+Setting function: Ey1D.Value=Ey
+Setting variable: Ey1D.SetPosition_0=2
+Setting variable: Ey1D.SetPosition_1=2
+Setting variable: Ey1D.SetPosition_2=0
+Setting string: Ey1D.Color=G
+Setting module: BO_Field-'Ez1D'
+Setting variable: Ez1D.dim=1
+Setting variable: Ez1D.SetMatrixSize_0=128
+Setting variable: Ez1D.SetBounds_0=-0.0000400000000000000032721221565612523818
+Setting variable: Ez1D.SetBounds_1=0.0000400000000000000032721221565612523818
+Setting variable: Ez1D.SetValues_0=-1100
+Setting variable: Ez1D.SetValues_1=1100
+Setting function: Ez1D.X=x
+Setting function: Ez1D.Y=0
+Setting function: Ez1D.Z=0
+Setting function: Ez1D.Value=Ez
+Setting variable: Ez1D.SetPosition_0=2
+Setting variable: Ez1D.SetPosition_1=2
+Setting variable: Ez1D.SetPosition_2=0
+Setting string: Ez1D.Color=G
+Setting module: BO_Field-'By1D'
+Setting variable: By1D.dim=1
+Setting variable: By1D.SetMatrixSize_0=128
+Setting variable: By1D.SetBounds_0=-0.0000400000000000000032721221565612523818
+Setting variable: By1D.SetBounds_1=0.0000400000000000000032721221565612523818
+Setting variable: By1D.SetValues_0=-1100
+Setting variable: By1D.SetValues_1=1100
+Setting function: By1D.X=x
+Setting function: By1D.Y=0
+Setting function: By1D.Z=0
+Setting function: By1D.Value=By
+Setting variable: By1D.SetPosition_0=2
+Setting variable: By1D.SetPosition_1=2
+Setting variable: By1D.SetPosition_2=0
+Setting string: By1D.Color=G
+Setting module: BO_Field-'Bz1D'
+Setting variable: Bz1D.dim=1
+Setting variable: Bz1D.SetMatrixSize_0=128
+Setting variable: Bz1D.SetBounds_0=-0.0000400000000000000032721221565612523818
+Setting variable: Bz1D.SetBounds_1=0.0000400000000000000032721221565612523818
+Setting variable: Bz1D.SetValues_0=-1100
+Setting variable: Bz1D.SetValues_1=1100
+Setting function: Bz1D.X=x
+Setting function: Bz1D.Y=0
+Setting function: Bz1D.Z=0
+Setting function: Bz1D.Value=Bz
+Setting variable: Bz1D.SetPosition_0=2
+Setting variable: Bz1D.SetPosition_1=2
+Setting variable: Bz1D.SetPosition_2=0
+Setting string: Bz1D.Color=G
+Setting variable: c2=898755178736817668096
+Setting variable: m2c4=0.0000000000006702867816839886329759256297
+Setting module: BO_Density-'PhotonEnergy1Dx'
+Setting variable: PhotonEnergy1Dx.dim=1
+Setting string: PhotonEnergy1Dx.type=Photon
+Setting variable: PhotonEnergy1Dx.SetMatrixSize_0=128
+Setting variable: PhotonEnergy1Dx.SetBounds_0=-0.0000400000000000000032721221565612523818
+Setting variable: PhotonEnergy1Dx.SetBounds_1=0.0000400000000000000032721221565612523818
+Setting function: PhotonEnergy1Dx.x=x
+Setting function: PhotonEnergy1Dx.Weight=(249999999999999.9375 * (0.0000000000006702867816839886329759256297 + ((((px * px) + (py * py)) + (pz * pz)) * 898755178736817668096)))
+Setting variable: PhotonEnergy1Dx.SetPosition_0=2
+Setting variable: PhotonEnergy1Dx.SetPosition_1=2
+Setting variable: PhotonEnergy1Dx.SetPosition_2=3
+Setting string: PhotonEnergy1Dx.Color=BbcyrR
+
+List of common variables:
+Amp = 1100
+BOHeight = 640
+BOIterationPass = 1
+BOWidth = 800
+CellVol = 2.5e-16
+Density = 1
+ElectronCharge = -4.8032e-10
+ElectronMass = 9.10938e-28
+IfBODataIsNeeded = 1
+IfBOPicsIsNeeded = 1
+IfBasicOutputIsNeeded = 1
+IterationsNumber = 2
+LightVelocity = 2.99792e+10
+MatrixSize_X = 128
+MatrixSize_Y = 4
+MatrixSize_Z = 4
+NumParticles = 250000
+Omega = 2.35456e+15
+ParticlesFactor = 2.048e-18
+PhotonMass = 1e-100
+Pi = 3.14159
+PlasmaVolume = 5.12e-13
+PlasmaXMax = 4e-05
+PlasmaXMin = -4e-05
+PlasmaYMax = 4e-05
+PlasmaYMin = -4e-05
+PlasmaZMax = 4e-05
+PlasmaZMin = -4e-05
+ProtonMass = 1.67262e-24
+RSize = 8e-05
+RelField = 1.33872e+08
+Size_X = 8e-05
+Size_Y = 8e-05
+Size_Z = 8e-05
+Step_X = 6.25e-07
+Step_Y = 2e-05
+Step_Z = 2e-05
+StepsPerPeriod = 200
+TimeStep = 1.33426e-17
+Wavelength = 8e-05
+X_Max = 4e-05
+X_Min = -4e-05
+Y_Max = 4e-05
+Y_Min = -4e-05
+Z_Max = 4e-05
+Z_Min = -4e-05
+c2 = 8.98755e+20
+e = 2.71828
+eV = 1.6e-12
+k = 78539.8
+m2c4 = 6.70287e-13
+planckConstant = 1.05457e-27
+
+List of module variables:
+
+Add_particles(Electron)
+Electron.charge = -4.8032e-10
+Electron.factor = 2.048e-18
+Electron.mass = 9.10938e-28
+
+Add_particles(Photon)
+Photon.charge = 0
+Photon.factor = 2.048e-18
+Photon.mass = 9.10938e-28
+
+Add_particles(Positron)
+Positron.charge = 4.8032e-10
+Positron.factor = 2.048e-18
+Positron.mass = 9.10938e-28
+
+BO_Axis(Electron1DxAxis)
+Electron1DxAxis.Range_0_1 = -4e-05
+Electron1DxAxis.Range_0_2 = 4e-05
+Electron1DxAxis.SetPosition_0 = 2
+Electron1DxAxis.SetPosition_1 = 2
+Electron1DxAxis.SetPosition_2 = 0
+
+BO_Axis(Electron1DyAxis)
+Electron1DyAxis.Range_0_1 = -4e-05
+Electron1DyAxis.Range_0_2 = 4e-05
+Electron1DyAxis.SetPosition_0 = 2
+Electron1DyAxis.SetPosition_1 = 2
+Electron1DyAxis.SetPosition_2 = 2
+
+BO_Axis(Photon1DxAxis)
+Photon1DxAxis.Range_0_1 = -4e-05
+Photon1DxAxis.Range_0_2 = 4e-05
+Photon1DxAxis.SetPosition_0 = 2
+Photon1DxAxis.SetPosition_1 = 2
+Photon1DxAxis.SetPosition_2 = 3
+
+BO_Axis(Positron1DxAxis)
+Positron1DxAxis.Range_0_1 = -4e-05
+Positron1DxAxis.Range_0_2 = 4e-05
+Positron1DxAxis.SetPosition_0 = 2
+Positron1DxAxis.SetPosition_1 = 2
+Positron1DxAxis.SetPosition_2 = 1
+
+BO_Density(Electron1Dx)
+Electron1Dx.SetBounds_0 = -4e-05
+Electron1Dx.SetBounds_1 = 4e-05
+Electron1Dx.SetMatrixSize_0 = 128
+Electron1Dx.SetPosition_0 = 2
+Electron1Dx.SetPosition_1 = 2
+Electron1Dx.SetPosition_2 = 0
+Electron1Dx.dim = 1
+
+BO_Density(Electron1Dy)
+Electron1Dy.SetBounds_0 = -4e-05
+Electron1Dy.SetBounds_1 = 4e-05
+Electron1Dy.SetMatrixSize_0 = 4
+Electron1Dy.SetPosition_0 = 2
+Electron1Dy.SetPosition_1 = 2
+Electron1Dy.SetPosition_2 = 2
+Electron1Dy.dim = 1
+
+BO_Density(Photon1Dx)
+Photon1Dx.SetBounds_0 = -4e-05
+Photon1Dx.SetBounds_1 = 4e-05
+Photon1Dx.SetMatrixSize_0 = 128
+Photon1Dx.SetPosition_0 = 2
+Photon1Dx.SetPosition_1 = 2
+Photon1Dx.SetPosition_2 = 3
+Photon1Dx.dim = 1
+
+BO_Density(PhotonEnergy1Dx)
+PhotonEnergy1Dx.SetBounds_0 = -4e-05
+PhotonEnergy1Dx.SetBounds_1 = 4e-05
+PhotonEnergy1Dx.SetMatrixSize_0 = 128
+PhotonEnergy1Dx.SetPosition_0 = 2
+PhotonEnergy1Dx.SetPosition_1 = 2
+PhotonEnergy1Dx.SetPosition_2 = 3
+PhotonEnergy1Dx.dim = 1
+
+BO_Density(Positron1Dx)
+Positron1Dx.SetBounds_0 = -4e-05
+Positron1Dx.SetBounds_1 = 4e-05
+Positron1Dx.SetMatrixSize_0 = 128
+Positron1Dx.SetPosition_0 = 2
+Positron1Dx.SetPosition_1 = 2
+Positron1Dx.SetPosition_2 = 1
+Positron1Dx.dim = 1
+
+BO_Field(By1D)
+By1D.SetBounds_0 = -4e-05
+By1D.SetBounds_1 = 4e-05
+By1D.SetMatrixSize_0 = 128
+By1D.SetPosition_0 = 2
+By1D.SetPosition_1 = 2
+By1D.SetPosition_2 = 0
+By1D.SetValues_0 = -1100
+By1D.SetValues_1 = 1100
+By1D.dim = 1
+
+BO_Field(Bz1D)
+Bz1D.SetBounds_0 = -4e-05
+Bz1D.SetBounds_1 = 4e-05
+Bz1D.SetMatrixSize_0 = 128
+Bz1D.SetPosition_0 = 2
+Bz1D.SetPosition_1 = 2
+Bz1D.SetPosition_2 = 0
+Bz1D.SetValues_0 = -1100
+Bz1D.SetValues_1 = 1100
+Bz1D.dim = 1
+
+BO_Field(Ey1D)
+Ey1D.SetBounds_0 = -4e-05
+Ey1D.SetBounds_1 = 4e-05
+Ey1D.SetMatrixSize_0 = 128
+Ey1D.SetPosition_0 = 2
+Ey1D.SetPosition_1 = 2
+Ey1D.SetPosition_2 = 0
+Ey1D.SetValues_0 = -1100
+Ey1D.SetValues_1 = 1100
+Ey1D.dim = 1
+
+BO_Field(Ez1D)
+Ez1D.SetBounds_0 = -4e-05
+Ez1D.SetBounds_1 = 4e-05
+Ez1D.SetMatrixSize_0 = 128
+Ez1D.SetPosition_0 = 2
+Ez1D.SetPosition_1 = 2
+Ez1D.SetPosition_2 = 0
+Ez1D.SetValues_0 = -1100
+Ez1D.SetValues_1 = 1100
+Ez1D.dim = 1
+
+Module(CurrentDeposition)
+
+Module(ParticleBC)
+
+Module(PresetFields)
+PresetFields.replaceInterpolation = 0
+
+Module(QED_AdaptiveEventGenerator)
+QED_AdaptiveEventGenerator.CellResamplingThreshold = -1
+QED_AdaptiveEventGenerator.DomainResamplingThreshold = -1
+QED_AdaptiveEventGenerator.IterationResamplingThreshold = -1
+QED_AdaptiveEventGenerator.RemovePhotonsBelow = 1.63742e-06
+
+ParticleThinout(ParticleThinoutElectron)
+ParticleThinoutElectron.limit = 1e+06
+
+ParticleThinout(ParticleThinoutPhoton)
+ParticleThinoutPhoton.limit = 1e+06
+
+ParticleThinout(ParticleThinoutPositron)
+ParticleThinoutPositron.limit = 1e+06
+
+List of functions and string variables:
+BODataFormat = 'txt'
+Block(x, xmin, xmax) = (0.5 * (sign((x - xmin)) + sign((xmax - x))))
+
+Add_particles(Electron)
+Electron.distribution(x, y, z) = (((1 * (((0.5 * (sign((x - (-0.0000400000000000000032721221565612523818))) + sign((0.0000400000000000000032721221565612523818 - x))))))) * (((0.5 * (sign((y - (-0.0000400000000000000032721221565612523818))) + sign((0.0000400000000000000032721221565612523818 - y))))))) * (((0.5 * (sign((z - (-0.0000400000000000000032721221565612523818))) + sign((0.0000400000000000000032721221565612523818 - z)))))))
+Electron.initialTemperature(x, y, z) = 0
+
+Add_particles(Photon)
+Photon.distribution(x, y, z) = 0
+Photon.initialTemperature(x, y, z) = 0
+
+Add_particles(Positron)
+Positron.distribution(x, y, z) = (((((1 * (((0.5 * (sign((x - (-0.0000400000000000000032721221565612523818))) + sign((0.0000400000000000000032721221565612523818 - x))))))) * (((0.5 * (sign((y - (-0.0000400000000000000032721221565612523818))) + sign((0.0000400000000000000032721221565612523818 - y))))))) * (((0.5 * (sign((z - (-0.0000400000000000000032721221565612523818))) + sign((0.0000400000000000000032721221565612523818 - z)))))))))
+Positron.initialTemperature(x, y, z) = 0
+
+BO_Axis(Electron1DxAxis)
+Electron1DxAxis.AdjustColorbarRanges = 'Electron1Dx'
+Electron1DxAxis.AdjustRanges = 'Electron1Dx'
+Electron1DxAxis.Colorbar_0 = 'BbcyrR'
+Electron1DxAxis.Label_0_0 = 'x'
+Electron1DxAxis.Label_0_1 = 'x'
+Electron1DxAxis.Label_1_0 = 'y'
+Electron1DxAxis.Label_1_1 = 'Ne'
+Electron1DxAxis.Range_0_0 = 'x'
+
+BO_Axis(Electron1DyAxis)
+Electron1DyAxis.AdjustColorbarRanges = 'Electron1Dy'
+Electron1DyAxis.AdjustRanges = 'Electron1Dy'
+Electron1DyAxis.Colorbar_0 = 'BbcyrR'
+Electron1DyAxis.Label_0_0 = 'x'
+Electron1DyAxis.Label_0_1 = 'y'
+Electron1DyAxis.Label_1_0 = 'y'
+Electron1DyAxis.Label_1_1 = 'Ne'
+Electron1DyAxis.Range_0_0 = 'x'
+
+BO_Axis(Photon1DxAxis)
+Photon1DxAxis.AdjustColorbarRanges = 'Photon1Dx'
+Photon1DxAxis.AdjustRanges = 'Photon1Dx'
+Photon1DxAxis.Colorbar_0 = 'BbcyrR'
+Photon1DxAxis.Label_0_0 = 'x'
+Photon1DxAxis.Label_0_1 = 'x'
+Photon1DxAxis.Label_1_0 = 'y'
+Photon1DxAxis.Label_1_1 = 'Nph'
+Photon1DxAxis.Range_0_0 = 'x'
+
+BO_Axis(Positron1DxAxis)
+Positron1DxAxis.AdjustColorbarRanges = 'Positron1Dx'
+Positron1DxAxis.AdjustRanges = 'Positron1Dx'
+Positron1DxAxis.Colorbar_0 = 'BbcyrR'
+Positron1DxAxis.Label_0_0 = 'x'
+Positron1DxAxis.Label_0_1 = 'x'
+Positron1DxAxis.Label_1_0 = 'y'
+Positron1DxAxis.Label_1_1 = 'Npos'
+Positron1DxAxis.Range_0_0 = 'x'
+
+BO_Density(Electron1Dx)
+Electron1Dx.Color = 'BbcyrR'
+Electron1Dx.Weight(x, y, z, px, py, pz) = 249999999999999.9375
+Electron1Dx.type = 'Electron'
+Electron1Dx.x(x, y, z, px, py, pz) = x
+
+BO_Density(Electron1Dy)
+Electron1Dy.Color = 'BbcyrR'
+Electron1Dy.Weight(x, y, z, px, py, pz) = 7812499999999.998046875
+Electron1Dy.type = 'Electron'
+Electron1Dy.x(x, y, z, px, py, pz) = y
+
+BO_Density(Photon1Dx)
+Photon1Dx.Color = 'BbcyrR'
+Photon1Dx.Weight(x, y, z, px, py, pz) = 249999999999999.9375
+Photon1Dx.type = 'Photon'
+Photon1Dx.x(x, y, z, px, py, pz) = x
+
+BO_Density(PhotonEnergy1Dx)
+PhotonEnergy1Dx.Color = 'BbcyrR'
+PhotonEnergy1Dx.Weight(x, y, z, px, py, pz) = (249999999999999.9375 * (0.0000000000006702867816839886329759256297 + ((((px * px) + (py * py)) + (pz * pz)) * 898755178736817668096)))
+PhotonEnergy1Dx.type = 'Photon'
+PhotonEnergy1Dx.x(x, y, z, px, py, pz) = x
+
+BO_Density(Positron1Dx)
+Positron1Dx.Color = 'BbcyrR'
+Positron1Dx.Weight(x, y, z, px, py, pz) = 249999999999999.9375
+Positron1Dx.type = 'Positron'
+Positron1Dx.x(x, y, z, px, py, pz) = x
+
+BO_Field(By1D)
+By1D.Color = 'G'
+By1D.Value(Ex, Ey, Ez, Bx, By, Bz) = By
+By1D.X(x) = x
+By1D.Y(x) = 0
+By1D.Z(x) = 0
+
+BO_Field(Bz1D)
+Bz1D.Color = 'G'
+Bz1D.Value(Ex, Ey, Ez, Bx, By, Bz) = Bz
+Bz1D.X(x) = x
+Bz1D.Y(x) = 0
+Bz1D.Z(x) = 0
+
+BO_Field(Ey1D)
+Ey1D.Color = 'G'
+Ey1D.Value(Ex, Ey, Ez, Bx, By, Bz) = Ey
+Ey1D.X(x) = x
+Ey1D.Y(x) = 0
+Ey1D.Z(x) = 0
+
+BO_Field(Ez1D)
+Ez1D.Color = 'G'
+Ez1D.Value(Ex, Ey, Ez, Bx, By, Bz) = Ez
+Ez1D.X(x) = x
+Ez1D.Y(x) = 0
+Ez1D.Z(x) = 0
+
+Module(CurrentDeposition)
+CurrentDeposition.type = 'Disabled'
+
+Module(ParticleBC)
+ParticleBC.x = 'periodic'
+ParticleBC.y = 'periodic'
+ParticleBC.z = 'periodic'
+
+Module(PresetFields)
+PresetFields.Bx(x, y, z, t) = 0
+PresetFields.By(x, y, z, t) = ((-147258996753.696044921875 * sin((78539.816339744822471402585506439208984375 * x))) * sin((2354564459136066 * t)))
+PresetFields.Bz(x, y, z, t) = ((-147258996753.696044921875 * sin((78539.816339744822471402585506439208984375 * x))) * cos((2354564459136066 * t)))
+PresetFields.Ex(x, y, z, t) = 0
+PresetFields.Ey(x, y, z, t) = ((147258996753.696044921875 * cos((78539.816339744822471402585506439208984375 * x))) * sin((2354564459136066 * t)))
+PresetFields.Ez(x, y, z, t) = ((147258996753.696044921875 * cos((78539.816339744822471402585506439208984375 * x))) * cos((2354564459136066 * t)))
+
+Module(QED_AdaptiveEventGenerator)
+
+ParticleThinout(ParticleThinoutElectron)
+ParticleThinoutElectron.type = 'Electron'
+
+ParticleThinout(ParticleThinoutPhoton)
+ParticleThinoutPhoton.type = 'Photon'
+
+ParticleThinout(ParticleThinoutPositron)
+ParticleThinoutPositron.type = 'Positron'
+
+List of undefined parameters:
