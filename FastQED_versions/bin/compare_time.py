@@ -27,17 +27,31 @@ mins = np.array([np.min(l) for l in times.values()])
 maxs = np.array([np.max(l) for l in times.values()])
 versions = [key[14:] for key in times.keys()]
 
-print(np.max((medians - mins)/medians))
+speedup_abs = [1.0]
+for time in mins[1:]:
+    speedup_abs.append(time / mins[0])
+speedup_abs = np.array(speedup_abs)
+
+print(np.max((maxs - mins)/medians))
 
 matplotlib.rcParams.update({'font.size': 18})
 
 fig = plt.figure()
 ax = fig.add_subplot(1,1,1)       
-ax.bar(versions, maxs, label="max")
-ax.bar(versions, medians, label="median")
-ax.bar(versions, mins, label="min")
+#ax.bar(versions, maxs, label="max")   
+#ax.bar(versions, medians, label="median")
+ax.bar(versions, mins, label="min", color="g")
 
-ax.legend()
+for i, rect, sp_abs in zip(range(len(mins)), ax.patches, speedup_abs):
+    height = rect.get_height()
+    if i == 0:
+        label = "100%"
+        ax.text(rect.get_x() + rect.get_width() / 2, height, label, ha="center", va="bottom")
+    if i >= 1:
+        label = "-%d" % (int((1.0 - sp_abs)*100)) + str("%")
+        ax.text(rect.get_x() + rect.get_width() / 2, height, label, ha="center", va="bottom")
+
+#ax.legend()
 ax.set_xlabel("version")
 ax.set_ylabel("time, s")
 
