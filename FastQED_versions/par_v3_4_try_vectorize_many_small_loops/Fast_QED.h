@@ -498,8 +498,7 @@ namespace pfc
                 for (int i = 0; i < size; i++)  // NOT VECTORIZED: func call (random number)
                     randomNumber[i] = randomNumberOmp(threadId);
 
-#pragma ivdep
-#pragma vector always
+#pragma omp simd
                 for (int i = 0; i < size; i++)
                     delta[i] = photonGenerator((chi[i + elimShift] + chi_new[i]) / (FP)2.0, randomNumber[i]);
 

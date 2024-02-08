@@ -426,6 +426,7 @@ struct Vector3
         x = other.x;
         y = other.y;
         z = other.z;
+        return *this;
     }
 
     forceinline T operator[](int idx) const

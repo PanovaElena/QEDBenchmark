@@ -91,6 +91,7 @@ namespace pfc {
             weight = particle.weight;
             gamma = particle.gamma;
             typeIndex = particle.typeIndex;
+            return *this;
         }
 
         //PositionTypeProxy& getProxyPosition() { return PositionTypeProxy(position); } //only advanced users

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 option(USE_OMP ON)
 
@@ -33,12 +33,12 @@ include_directories(
 
 # baseline
 add_executable(QED_benchmark_v0
+	${CMAKE_SOURCE_DIR}/par_v0_critical/macros.h
 	${CMAKE_SOURCE_DIR}/par_v0_critical/breit_wheeler.h
 	${CMAKE_SOURCE_DIR}/par_v0_critical/compton.h
 	${CMAKE_SOURCE_DIR}/par_v0_critical/Fast_QED.h
 	${CMAKE_SOURCE_DIR}/par_v0_critical/Vectors.h
 	${CMAKE_SOURCE_DIR}/par_v0_critical/Particle.h
-	${CMAKE_SOURCE_DIR}/src/macros.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 target_compile_definitions(QED_benchmark_v0 PUBLIC __VER_QED_BENCHMARK__="v0")
@@ -46,12 +46,12 @@ target_include_directories(QED_benchmark_v0 PUBLIC ${CMAKE_SOURCE_DIR}/par_v0_cr
 
 # non-crtitical
 add_executable(QED_benchmark_v1
+	${CMAKE_SOURCE_DIR}/par_v1_nocritical/macros.h
 	${CMAKE_SOURCE_DIR}/par_v1_nocritical/breit_wheeler.h
 	${CMAKE_SOURCE_DIR}/par_v1_nocritical/compton.h
 	${CMAKE_SOURCE_DIR}/par_v1_nocritical/Fast_QED.h
     ${CMAKE_SOURCE_DIR}/par_v1_nocritical/Vectors.h
 	${CMAKE_SOURCE_DIR}/par_v1_nocritical/Particle.h
-	${CMAKE_SOURCE_DIR}/src/macros.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 target_compile_definitions(QED_benchmark_v1 PUBLIC __VER_QED_BENCHMARK__="v1")
@@ -59,48 +59,48 @@ target_include_directories(QED_benchmark_v1 PUBLIC ${CMAKE_SOURCE_DIR}/par_v1_no
 
 # optimized vectors
 add_executable(QED_benchmark_v2_1
+	${CMAKE_SOURCE_DIR}/par_v2_1_reserve/macros.h
 	${CMAKE_SOURCE_DIR}/par_v2_1_reserve/breit_wheeler.h
 	${CMAKE_SOURCE_DIR}/par_v2_1_reserve/compton.h
 	${CMAKE_SOURCE_DIR}/par_v2_1_reserve/Fast_QED.h
     ${CMAKE_SOURCE_DIR}/par_v2_1_reserve/Vectors.h
 	${CMAKE_SOURCE_DIR}/par_v2_1_reserve/Particle.h
-	${CMAKE_SOURCE_DIR}/src/macros.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 target_compile_definitions(QED_benchmark_v2_1 PUBLIC __VER_QED_BENCHMARK__="v2_1")
 target_include_directories(QED_benchmark_v2_1 PUBLIC ${CMAKE_SOURCE_DIR}/par_v2_1_reserve/)
 
 add_executable(QED_benchmark_v2_2
+	${CMAKE_SOURCE_DIR}/par_v2_2_newvec/macros.h
 	${CMAKE_SOURCE_DIR}/par_v2_2_newvec/breit_wheeler.h
 	${CMAKE_SOURCE_DIR}/par_v2_2_newvec/compton.h
 	${CMAKE_SOURCE_DIR}/par_v2_2_newvec/Fast_QED.h
     ${CMAKE_SOURCE_DIR}/par_v2_2_newvec/Vectors.h
 	${CMAKE_SOURCE_DIR}/par_v2_2_newvec/Particle.h
-	${CMAKE_SOURCE_DIR}/src/macros.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 target_compile_definitions(QED_benchmark_v2_2 PUBLIC __VER_QED_BENCHMARK__="v2_2")
 target_include_directories(QED_benchmark_v2_2 PUBLIC ${CMAKE_SOURCE_DIR}/par_v2_2_newvec/)
 
 add_executable(QED_benchmark_v2_3
+	${CMAKE_SOURCE_DIR}/par_v2_3_avoid_of_small_vectors/macros.h
 	${CMAKE_SOURCE_DIR}/par_v2_3_avoid_of_small_vectors/breit_wheeler.h
 	${CMAKE_SOURCE_DIR}/par_v2_3_avoid_of_small_vectors/compton.h
 	${CMAKE_SOURCE_DIR}/par_v2_3_avoid_of_small_vectors/Fast_QED.h
     ${CMAKE_SOURCE_DIR}/par_v2_3_avoid_of_small_vectors/Vectors.h
 	${CMAKE_SOURCE_DIR}/par_v2_3_avoid_of_small_vectors/Particle.h
-	${CMAKE_SOURCE_DIR}/src/macros.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 target_compile_definitions(QED_benchmark_v2_3 PUBLIC __VER_QED_BENCHMARK__="v2_3")
 target_include_directories(QED_benchmark_v2_3 PUBLIC ${CMAKE_SOURCE_DIR}/par_v2_3_avoid_of_small_vectors/)
 
 add_executable(QED_benchmark_v2_4
+	${CMAKE_SOURCE_DIR}/par_v2_4_myvec/macros.h
 	${CMAKE_SOURCE_DIR}/par_v2_4_myvec/breit_wheeler.h
 	${CMAKE_SOURCE_DIR}/par_v2_4_myvec/compton.h
 	${CMAKE_SOURCE_DIR}/par_v2_4_myvec/Fast_QED.h
     ${CMAKE_SOURCE_DIR}/par_v2_4_myvec/Vectors.h
 	${CMAKE_SOURCE_DIR}/par_v2_4_myvec/Particle.h
-	${CMAKE_SOURCE_DIR}/src/macros.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 target_compile_definitions(QED_benchmark_v2_4 PUBLIC __VER_QED_BENCHMARK__="v2_4")
@@ -108,60 +108,60 @@ target_include_directories(QED_benchmark_v2_4 PUBLIC ${CMAKE_SOURCE_DIR}/par_v2_
 
 # vectorization
 add_executable(QED_benchmark_v3_1
+	${CMAKE_SOURCE_DIR}/par_v3_1_chunks/macros.h
 	${CMAKE_SOURCE_DIR}/par_v3_1_chunks/breit_wheeler.h
 	${CMAKE_SOURCE_DIR}/par_v3_1_chunks/compton.h
 	${CMAKE_SOURCE_DIR}/par_v3_1_chunks/Fast_QED.h
     ${CMAKE_SOURCE_DIR}/par_v3_1_chunks/Vectors.h
 	${CMAKE_SOURCE_DIR}/par_v3_1_chunks/Particle.h
-	${CMAKE_SOURCE_DIR}/src/macros.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 target_compile_definitions(QED_benchmark_v3_1 PUBLIC __VER_QED_BENCHMARK__="v3_1")
 target_include_directories(QED_benchmark_v3_1 PUBLIC ${CMAKE_SOURCE_DIR}/par_v3_1_chunks/)
 
 add_executable(QED_benchmark_v3_2
+	${CMAKE_SOURCE_DIR}/par_v3_2_try_vectorize_one_loop/macros.h
 	${CMAKE_SOURCE_DIR}/par_v3_2_try_vectorize_one_loop/breit_wheeler.h
 	${CMAKE_SOURCE_DIR}/par_v3_2_try_vectorize_one_loop/compton.h
 	${CMAKE_SOURCE_DIR}/par_v3_2_try_vectorize_one_loop/Fast_QED.h
     ${CMAKE_SOURCE_DIR}/par_v3_2_try_vectorize_one_loop/Vectors.h
 	${CMAKE_SOURCE_DIR}/par_v3_2_try_vectorize_one_loop/Particle.h
-	${CMAKE_SOURCE_DIR}/src/macros.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 target_compile_definitions(QED_benchmark_v3_2 PUBLIC __VER_QED_BENCHMARK__="v3_2")
 target_include_directories(QED_benchmark_v3_2 PUBLIC ${CMAKE_SOURCE_DIR}/par_v3_2_try_vectorize_one_loop/)
 
 add_executable(QED_benchmark_v3_3
+	${CMAKE_SOURCE_DIR}/par_v3_3_try_vectorize_one_loop_pragma_simd/macros.h
 	${CMAKE_SOURCE_DIR}/par_v3_3_try_vectorize_one_loop_pragma_simd/breit_wheeler.h
 	${CMAKE_SOURCE_DIR}/par_v3_3_try_vectorize_one_loop_pragma_simd/compton.h
 	${CMAKE_SOURCE_DIR}/par_v3_3_try_vectorize_one_loop_pragma_simd/Fast_QED.h
     ${CMAKE_SOURCE_DIR}/par_v3_3_try_vectorize_one_loop_pragma_simd/Vectors.h
 	${CMAKE_SOURCE_DIR}/par_v3_3_try_vectorize_one_loop_pragma_simd/Particle.h
-	${CMAKE_SOURCE_DIR}/src/macros.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 target_compile_definitions(QED_benchmark_v3_3 PUBLIC __VER_QED_BENCHMARK__="v3_3")
 target_include_directories(QED_benchmark_v3_3 PUBLIC ${CMAKE_SOURCE_DIR}/par_v3_3_try_vectorize_one_loop_pragma_simd/)
 
 add_executable(QED_benchmark_v3_4
+	${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/macros.h
 	${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/breit_wheeler.h
 	${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/compton.h
 	${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/Fast_QED.h
     ${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/Vectors.h
 	${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/Particle.h
-	${CMAKE_SOURCE_DIR}/src/macros.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 target_compile_definitions(QED_benchmark_v3_4 PUBLIC __VER_QED_BENCHMARK__="v3_4")
 target_include_directories(QED_benchmark_v3_4 PUBLIC ${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/)
 
 add_executable(QED_benchmark_v3_5
+	${CMAKE_SOURCE_DIR}/par_v3_5_vectorized_combined_loops/macros.h
 	${CMAKE_SOURCE_DIR}/par_v3_5_vectorized_combined_loops/breit_wheeler.h
 	${CMAKE_SOURCE_DIR}/par_v3_5_vectorized_combined_loops/compton.h
 	${CMAKE_SOURCE_DIR}/par_v3_5_vectorized_combined_loops/Fast_QED.h
     ${CMAKE_SOURCE_DIR}/par_v3_5_vectorized_combined_loops/Vectors.h
 	${CMAKE_SOURCE_DIR}/par_v3_5_vectorized_combined_loops/Particle.h
-	${CMAKE_SOURCE_DIR}/src/macros.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
 target_compile_definitions(QED_benchmark_v3_5 PUBLIC __VER_QED_BENCHMARK__="v3_5")
