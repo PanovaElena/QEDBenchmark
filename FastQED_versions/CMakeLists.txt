@@ -23,6 +23,10 @@ else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qopt-report=max")
 endif()
 
+if (NOT ITER)
+    set(ITER 61)
+endif()
+
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR}/bin/)
 
@@ -41,7 +45,7 @@ add_executable(QED_benchmark_v0
 	${CMAKE_SOURCE_DIR}/par_v0_critical/Particle.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
-target_compile_definitions(QED_benchmark_v0 PUBLIC __VER_QED_BENCHMARK__="v0")
+target_compile_definitions(QED_benchmark_v0 PUBLIC __VER_QED_BENCHMARK__="v0" PUBLIC __ITER_NUM__=${ITER})
 target_include_directories(QED_benchmark_v0 PUBLIC ${CMAKE_SOURCE_DIR}/par_v0_critical/)
 
 # non-crtitical
@@ -54,7 +58,7 @@ add_executable(QED_benchmark_v1
 	${CMAKE_SOURCE_DIR}/par_v1_nocritical/Particle.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
-target_compile_definitions(QED_benchmark_v1 PUBLIC __VER_QED_BENCHMARK__="v1")
+target_compile_definitions(QED_benchmark_v1 PUBLIC __VER_QED_BENCHMARK__="v1" PUBLIC __ITER_NUM__=${ITER})
 target_include_directories(QED_benchmark_v1 PUBLIC ${CMAKE_SOURCE_DIR}/par_v1_nocritical/)
 
 # optimized vectors
@@ -67,7 +71,7 @@ add_executable(QED_benchmark_v2_1
 	${CMAKE_SOURCE_DIR}/par_v2_1_reserve/Particle.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
-target_compile_definitions(QED_benchmark_v2_1 PUBLIC __VER_QED_BENCHMARK__="v2_1")
+target_compile_definitions(QED_benchmark_v2_1 PUBLIC __VER_QED_BENCHMARK__="v2_1" PUBLIC __ITER_NUM__=${ITER})
 target_include_directories(QED_benchmark_v2_1 PUBLIC ${CMAKE_SOURCE_DIR}/par_v2_1_reserve/)
 
 add_executable(QED_benchmark_v2_2
@@ -79,7 +83,7 @@ add_executable(QED_benchmark_v2_2
 	${CMAKE_SOURCE_DIR}/par_v2_2_newvec/Particle.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
-target_compile_definitions(QED_benchmark_v2_2 PUBLIC __VER_QED_BENCHMARK__="v2_2")
+target_compile_definitions(QED_benchmark_v2_2 PUBLIC __VER_QED_BENCHMARK__="v2_2" PUBLIC __ITER_NUM__=${ITER})
 target_include_directories(QED_benchmark_v2_2 PUBLIC ${CMAKE_SOURCE_DIR}/par_v2_2_newvec/)
 
 add_executable(QED_benchmark_v2_3
@@ -91,7 +95,7 @@ add_executable(QED_benchmark_v2_3
 	${CMAKE_SOURCE_DIR}/par_v2_3_avoid_of_small_vectors/Particle.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
-target_compile_definitions(QED_benchmark_v2_3 PUBLIC __VER_QED_BENCHMARK__="v2_3")
+target_compile_definitions(QED_benchmark_v2_3 PUBLIC __VER_QED_BENCHMARK__="v2_3" PUBLIC __ITER_NUM__=${ITER})
 target_include_directories(QED_benchmark_v2_3 PUBLIC ${CMAKE_SOURCE_DIR}/par_v2_3_avoid_of_small_vectors/)
 
 add_executable(QED_benchmark_v2_4
@@ -103,7 +107,7 @@ add_executable(QED_benchmark_v2_4
 	${CMAKE_SOURCE_DIR}/par_v2_4_myvec/Particle.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
-target_compile_definitions(QED_benchmark_v2_4 PUBLIC __VER_QED_BENCHMARK__="v2_4")
+target_compile_definitions(QED_benchmark_v2_4 PUBLIC __VER_QED_BENCHMARK__="v2_4" PUBLIC __ITER_NUM__=${ITER})
 target_include_directories(QED_benchmark_v2_4 PUBLIC ${CMAKE_SOURCE_DIR}/par_v2_4_myvec/)
 
 # vectorization
@@ -116,7 +120,7 @@ add_executable(QED_benchmark_v3_1
 	${CMAKE_SOURCE_DIR}/par_v3_1_chunks/Particle.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
-target_compile_definitions(QED_benchmark_v3_1 PUBLIC __VER_QED_BENCHMARK__="v3_1")
+target_compile_definitions(QED_benchmark_v3_1 PUBLIC __VER_QED_BENCHMARK__="v3_1" PUBLIC __ITER_NUM__=${ITER})
 target_include_directories(QED_benchmark_v3_1 PUBLIC ${CMAKE_SOURCE_DIR}/par_v3_1_chunks/)
 
 add_executable(QED_benchmark_v3_2
@@ -128,7 +132,7 @@ add_executable(QED_benchmark_v3_2
 	${CMAKE_SOURCE_DIR}/par_v3_2_try_vectorize_one_loop/Particle.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
-target_compile_definitions(QED_benchmark_v3_2 PUBLIC __VER_QED_BENCHMARK__="v3_2")
+target_compile_definitions(QED_benchmark_v3_2 PUBLIC __VER_QED_BENCHMARK__="v3_2" PUBLIC __ITER_NUM__=${ITER})
 target_include_directories(QED_benchmark_v3_2 PUBLIC ${CMAKE_SOURCE_DIR}/par_v3_2_try_vectorize_one_loop/)
 
 add_executable(QED_benchmark_v3_3
@@ -140,12 +144,12 @@ add_executable(QED_benchmark_v3_3
 	${CMAKE_SOURCE_DIR}/par_v3_3_try_vectorize_one_loop_pragma_simd/Particle.h
 	${CMAKE_SOURCE_DIR}/src/main.cpp
 	)
-target_compile_definitions(QED_benchmark_v3_3 PUBLIC __VER_QED_BENCHMARK__="v3_3")
+target_compile_definitions(QED_benchmark_v3_3 PUBLIC __VER_QED_BENCHMARK__="v3_3" PUBLIC __ITER_NUM__=${ITER})
 target_include_directories(QED_benchmark_v3_3 PUBLIC ${CMAKE_SOURCE_DIR}/par_v3_3_try_vectorize_one_loop_pragma_simd/)
 
 set(CHUNK_SIZES 8 16 32 64 128 256 512)
-foreach(ch IN LISTS CHUNK_SIZES)
-    add_executable(QED_benchmark_v3_4_${ch}
+foreach(CHUNK IN LISTS CHUNK_SIZES)
+    add_executable(QED_benchmark_v3_4_${CHUNK}
         ${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/macros.h
         ${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/breit_wheeler.h
         ${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/compton.h
@@ -154,10 +158,10 @@ foreach(ch IN LISTS CHUNK_SIZES)
         ${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/Particle.h
         ${CMAKE_SOURCE_DIR}/src/main.cpp
         )
-    target_compile_definitions(QED_benchmark_v3_4_${ch} PUBLIC __VER_QED_BENCHMARK__="v3_4_${ch}" PUBLIC __CHUNK_SIZE__=${ch})
-    target_include_directories(QED_benchmark_v3_4_${ch} PUBLIC ${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/)
+    target_compile_definitions(QED_benchmark_v3_4_${CHUNK} PUBLIC __VER_QED_BENCHMARK__="v3_4_${CHUNK}" PUBLIC __CHUNK_SIZE__=${CHUNK} PUBLIC __ITER_NUM__=${ITER})
+    target_include_directories(QED_benchmark_v3_4_${CHUNK} PUBLIC ${CMAKE_SOURCE_DIR}/par_v3_4_try_vectorize_many_small_loops/)
     
-    add_executable(QED_benchmark_v3_5_${ch}
+    add_executable(QED_benchmark_v3_5_${CHUNK}
         ${CMAKE_SOURCE_DIR}/par_v3_5_vectorized_combined_loops/macros.h
         ${CMAKE_SOURCE_DIR}/par_v3_5_vectorized_combined_loops/breit_wheeler.h
         ${CMAKE_SOURCE_DIR}/par_v3_5_vectorized_combined_loops/compton.h
@@ -166,6 +170,6 @@ foreach(ch IN LISTS CHUNK_SIZES)
         ${CMAKE_SOURCE_DIR}/par_v3_5_vectorized_combined_loops/Particle.h
         ${CMAKE_SOURCE_DIR}/src/main.cpp
         )
-    target_compile_definitions(QED_benchmark_v3_5_${ch} PUBLIC __VER_QED_BENCHMARK__="v3_5_${ch}" PUBLIC __CHUNK_SIZE__=${ch})
-    target_include_directories(QED_benchmark_v3_5_${ch} PUBLIC ${CMAKE_SOURCE_DIR}/par_v3_5_vectorized_combined_loops/)
+    target_compile_definitions(QED_benchmark_v3_5_${CHUNK} PUBLIC __VER_QED_BENCHMARK__="v3_5_${CHUNK}" PUBLIC __CHUNK_SIZE__=${CHUNK} PUBLIC __ITER_NUM__=${ITER})
+    target_include_directories(QED_benchmark_v3_5_${CHUNK} PUBLIC ${CMAKE_SOURCE_DIR}/par_v3_5_vectorized_combined_loops/)
 endforeach()

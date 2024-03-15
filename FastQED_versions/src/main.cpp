@@ -249,7 +249,7 @@ int main() {
 
     const FP RemovePhotonsBelow = 2.0 * constants::electronMass * constants::c * constants::c;
 
-    const int IterationsNumber = 61; // 5 * StepsPerPeriod + 1; // 
+    const int IterationsNumber = int(__ITER_NUM__); // 61, 1001, 5 * StepsPerPeriod + 1; // 
     const int BOIterationPass = StepsPerPeriod / 20;
 
     Int3 gridSize(MatrixSize_X, MatrixSize_Y, MatrixSize_Z);

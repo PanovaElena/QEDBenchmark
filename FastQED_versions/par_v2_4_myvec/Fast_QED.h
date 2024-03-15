@@ -28,8 +28,7 @@ namespace pfc
 
         template <class T>
         struct VectorOfGenElements {
-            constexpr static int factor = 2;
-
+            static const int factor = 2;
             int n = 0, capacity = 8;
             T* data = nullptr;
 
