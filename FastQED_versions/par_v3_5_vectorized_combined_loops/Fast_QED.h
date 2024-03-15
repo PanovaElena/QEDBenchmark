@@ -22,7 +22,7 @@ namespace pfc
     {
     public:
 
-        static const int chunkSize = 8;
+        static const int chunkSize = int(__CHUNK_SIZE__);
 
         template <class T>
         struct VectorOfGenElements {

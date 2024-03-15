@@ -34,7 +34,7 @@ namespace pfc
             T* data = nullptr;
 
             VectorOfGenElements() {
-                reallocate();
+                data = static_cast<T*>(std::malloc(sizeof(T) * capacity));
             }
             ~VectorOfGenElements() {
                 std::free(data);
@@ -42,8 +42,12 @@ namespace pfc
             VectorOfGenElements(const VectorOfGenElements&) = delete;
             VectorOfGenElements& operator=(const VectorOfGenElements&) = delete;
 
-            void reallocate() {
-                data = reinterpret_cast<T*>(std::realloc(data, sizeof(T) * capacity));
+            void reallocate(int newCapacity) {
+                T* tmp = static_cast<T*>(std::malloc(sizeof(T) * newCapacity));
+                std::memmove(tmp, data, sizeof(T) * capacity);
+                std::free(data);
+                data = tmp;
+                capacity = newCapacity;
             }
 
             T& operator[](int i) { return data[i]; }
@@ -53,10 +57,8 @@ namespace pfc
             void clear() { n = 0; }
 
             void push_back(const T& value) {
-                if (n == capacity) {
-                    capacity *= factor;
-                    reallocate();
-                }
+                if (n == capacity)
+                    reallocate(capacity * factor);
                 data[n++] = value;
             }
 
