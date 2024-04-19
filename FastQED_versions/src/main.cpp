@@ -24,17 +24,20 @@ class Output {
 public:
 
     std::string outputDir = "./Hichi_" + std::string(__VER_QED_BENCHMARK__) + "/BasicOutput/data/";
+    std::string suffix;
     std::vector<FP> dataX, dataY;
     Int3 matrixSize;
     FP3 minCoord, maxCoord;
 
-    Output(Int3 matrixSize, FP3 minCoord, FP3 maxCoord) :
-        matrixSize(matrixSize), minCoord(minCoord), maxCoord(maxCoord) {
+    Output(Int3 matrixSize, FP3 minCoord, FP3 maxCoord, std::string suffix) :
+        suffix(std::string("_") + suffix), matrixSize(matrixSize),
+        minCoord(minCoord), maxCoord(maxCoord) {
         dataX.resize(matrixSize.x);
         dataY.resize(matrixSize.y);
     }
 
-    void fillDataDensity(ParticleArray3d& particles, CoordinateEnum axisLabel, std::vector<FP>& data) {
+    void fillDataDensity(ParticleArray3d& particles, CoordinateEnum axisLabel,
+        std::vector<FP>& data) {
         std::fill(data.begin(), data.end(), 0.0);
 
         int axis0 = (int)axisLabel;
@@ -57,7 +60,8 @@ public:
         }
     }
 
-    void fillDataEnergy(ParticleArray3d& particles, CoordinateEnum axisLabel, std::vector<FP>& data) {
+    void fillDataEnergy(ParticleArray3d& particles, CoordinateEnum axisLabel,
+        std::vector<FP>& data) {
         std::fill(data.begin(), data.end(), 0.0);
 
         int axis0 = (int)axisLabel;
@@ -108,7 +112,7 @@ public:
         int len = fileName.size();
         for (int i = 0; i < 6 - len; i++)
             fileName = "0" + fileName;
-        return fileName + ".txt";
+        return fileName + suffix + ".txt";
     }
 
     void writeToFile(const std::vector<FP>& data, std::string dir, std::string fileName) {
@@ -189,7 +193,7 @@ void startThinning(Ensemble3d& ensemble, std::vector<int> limits,
 }
 
 
-int main() {
+int main(int argc, char** argv) {
     //omp_set_num_threads(1);
 
     // -------- some constants --------
@@ -327,7 +331,9 @@ int main() {
 #endif
     // -------- output --------
 
-    Output output(gridSize, minCoords, maxCoords);
+    std::string fileSuffix;
+    if (argc >= 2) fileSuffix = argv[1];
+    Output output(gridSize, minCoords, maxCoords, fileSuffix);
 
     // -------- modeling --------
     double tAll = OMP_GET_WTIME();
