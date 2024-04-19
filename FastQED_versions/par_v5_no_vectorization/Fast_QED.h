@@ -22,36 +22,43 @@ namespace pfc
     {
     public:
 
-        static const int chunkSize = 8;
+        static const int chunkSize = int(__CHUNK_SIZE__);
 
         template <class T>
-        struct VectorOfGenElements {
+        class VectorOfGenElements {
             static const int factor = 2;
 
             int n = 0, capacity = chunkSize;
-            std::vector<T> data;
+            std::vector<T> elements;
 
-            VectorOfGenElements() : data(capacity) {}
+        public:
 
-            forceinline T& operator[](int i) { return data[i]; }
-            forceinline const T& operator[](int i) const { return data[i]; }
+            VectorOfGenElements() : elements(capacity) {}
+
+            forceinline T& operator[](int i) { return elements[i]; }
+            forceinline const T& operator[](int i) const { return elements[i]; }
 
             forceinline int& size() { return n; }
             forceinline void clear() { n = 0; }
+            forceinline T* data() { return elements.data(); }
 
             forceinline void decrease(int newSize) { n = newSize; }
 
             forceinline void increaseCapacity(int newCapacity) {
-                data.resize(newCapacity);
+                elements.resize(newCapacity);
                 capacity = newCapacity;
-            }
-            forceinline void reserveAdditional(int size) {  // size <= chunkSize
-                if (n + size >= capacity) increaseCapacity(factor * capacity);
             }
 
             forceinline void push_back(const T& value) {
                 if (n == capacity) increaseCapacity(factor * capacity);
-                data[n++] = value;
+                elements[n++] = value;
+            }
+            forceinline void extend(const T* values, int size) {
+                while (n + size >= capacity) increaseCapacity(factor * capacity);
+//#pragma omp simd
+                for (int i = 0; i < size; i++)
+                    elements[n + i] = values[i];
+                n += size;
             }
             forceinline void pop_back() { n--; }
         };
@@ -178,7 +185,7 @@ namespace pfc
                     timeAvalancheParticlesThread[threadId], timeAvalanchePhotonsThread[threadId],
                     eAvalancheParticlesThread[threadId], bAvalancheParticlesThread[threadId],
                     eAvalanchePhotonsThread[threadId], bAvalanchePhotonsThread[threadId],
-                    begin, end
+                    begin, end, threadId
                 );
             }
             if (chunkRem != 0)
@@ -187,7 +194,7 @@ namespace pfc
                     timeAvalancheParticlesThread[0], timeAvalanchePhotonsThread[0],
                     eAvalancheParticlesThread[0], bAvalancheParticlesThread[0],
                     eAvalanchePhotonsThread[0], bAvalanchePhotonsThread[0],
-                    n - chunkRem, n
+                    n - chunkRem, n, 0
                 );
         }
 
@@ -224,7 +231,7 @@ namespace pfc
                     timeAvalancheParticlesThread[threadId], timeAvalanchePhotonsThread[threadId],
                     eAvalancheParticlesThread[threadId], bAvalancheParticlesThread[threadId],
                     eAvalanchePhotonsThread[threadId], bAvalanchePhotonsThread[threadId],
-                    begin, end
+                    begin, end, threadId
                 );
             }
             if (chunkRem != 0)
@@ -233,7 +240,7 @@ namespace pfc
                     timeAvalancheParticlesThread[0], timeAvalanchePhotonsThread[0],
                     eAvalancheParticlesThread[0], bAvalancheParticlesThread[0],
                     eAvalanchePhotonsThread[0], bAvalanchePhotonsThread[0],
-                    n - chunkRem, n
+                    n - chunkRem, n, 0
                 );
         }
 
@@ -247,7 +254,7 @@ namespace pfc
             VectorOfGenElements<FP3>& bAvalancheParticles,
             VectorOfGenElements<FP3>& eAvalanchePhotons,
             VectorOfGenElements<FP3>& bAvalanchePhotons,
-            const int begin, const int end
+            const int begin, const int end, const int threadId
         )
         {
             int prevGeneratedParticlesSize = generatedParticles.size();
@@ -266,7 +273,7 @@ namespace pfc
                 eAvalancheParticles, bAvalancheParticles,
                 generatedPhotons, timeAvalanchePhotons,
                 eAvalanchePhotons, bAvalanchePhotons,
-                prevGeneratedParticlesSize, prevGeneratedPhotonsSize);
+                prevGeneratedParticlesSize, prevGeneratedPhotonsSize, threadId);
 
             // pop non-physical photons
             removeNonPhysicalPhotons(generatedPhotons, prevGeneratedPhotonsSize);
@@ -289,7 +296,7 @@ namespace pfc
             VectorOfGenElements<FP3>& bAvalancheParticles,
             VectorOfGenElements<FP3>& eAvalanchePhotons,
             VectorOfGenElements<FP3>& bAvalanchePhotons,
-            const int begin, const int end
+            const int begin, const int end, const int threadId
         )
         {
             int prevGeneratedParticlesSize = generatedParticles.size();
@@ -308,7 +315,7 @@ namespace pfc
                 eAvalancheParticles, bAvalancheParticles,
                 generatedPhotons, timeAvalanchePhotons,
                 eAvalanchePhotons, bAvalanchePhotons,
-                prevGeneratedParticlesSize, prevGeneratedPhotonsSize);
+                prevGeneratedParticlesSize, prevGeneratedPhotonsSize, threadId);
 
             // pop non-physical photons
             removeNonPhysicalPhotons(generatedPhotons, prevGeneratedPhotonsSize);
@@ -329,7 +336,7 @@ namespace pfc
             VectorOfGenElements<FP3>& eAvalancheParticles, VectorOfGenElements<FP3>& bAvalancheParticles,
             VectorOfGenElements<Particle3d>& generatedPhotons, VectorOfGenElements<FP>& timeAvalanchePhotons,
             VectorOfGenElements<FP3>& eAvalanchePhotons, VectorOfGenElements<FP3>& bAvalanchePhotons,
-            int generatedParticlesStart, int generatedPhotonsStart)
+            int generatedParticlesStart, int generatedPhotonsStart, const int threadId)
         {
             int countProcessedParticles = generatedParticlesStart;
             int countProcessedPhotons = generatedPhotonsStart;
@@ -338,61 +345,51 @@ namespace pfc
                 || countProcessedPhotons != generatedPhotons.size())
             {
                 int n = generatedParticles.size() - countProcessedParticles;
-                //int nChunks = n / chunkSize;
-                //int chunkRem = n - nChunks * chunkSize;
-                //
-                //for (int chunkNum = 0; chunkNum < nChunks; chunkNum++)
-                //    oneParticleStep(generatedParticles,
-                //        eAvalancheParticles, bAvalancheParticles,
-                //        timeAvalancheParticles, timeStep,
-                //        generatedPhotons, timeAvalanchePhotons,
-                //        eAvalanchePhotons, bAvalanchePhotons,
-                //        countProcessedParticles + chunkNum * chunkSize, chunkSize, generatedParticlesStart
-                //    );
-                //if (chunkRem != 0)
-                //    oneParticleStep(generatedParticles,
-                //        eAvalancheParticles, bAvalancheParticles,
-                //        timeAvalancheParticles, timeStep,
-                //        generatedPhotons, timeAvalanchePhotons,
-                //        eAvalanchePhotons, bAvalanchePhotons,
-                //        countProcessedParticles + n - chunkRem, chunkRem, generatedParticlesStart
-                //    );
-                oneParticleStep(generatedParticles,
-                    eAvalancheParticles, bAvalancheParticles,
-                    timeAvalancheParticles, timeStep,
-                    generatedPhotons, timeAvalanchePhotons,
-                    eAvalanchePhotons, bAvalanchePhotons,
-                    countProcessedParticles, n, generatedParticlesStart
-                );
+                int nChunks = n / chunkSize;
+                int chunkRem = n - nChunks * chunkSize;
+
+                for (int chunkNum = 0; chunkNum < nChunks; chunkNum++)
+                    oneParticleStep(generatedParticles,
+                        eAvalancheParticles, bAvalancheParticles,
+                        timeAvalancheParticles, timeStep,
+                        generatedPhotons, timeAvalanchePhotons,
+                        eAvalanchePhotons, bAvalanchePhotons,
+                        countProcessedParticles + chunkNum * chunkSize, chunkSize,
+                        generatedParticlesStart, threadId
+                    );
+                if (chunkRem != 0)
+                    oneParticleStep(generatedParticles,
+                        eAvalancheParticles, bAvalancheParticles,
+                        timeAvalancheParticles, timeStep,
+                        generatedPhotons, timeAvalanchePhotons,
+                        eAvalanchePhotons, bAvalanchePhotons,
+                        countProcessedParticles + n - chunkRem, chunkRem,
+                        generatedParticlesStart, threadId
+                    );
                 countProcessedParticles = generatedParticles.size();
 
                 n = generatedPhotons.size() - countProcessedPhotons;
-                //nChunks = n / chunkSize;
-                //chunkRem = n - nChunks * chunkSize;
-                //
-                //for (int chunkNum = 0; chunkNum < nChunks; chunkNum++)
-                //    onePhotonStep(generatedPhotons,
-                //        eAvalanchePhotons, bAvalanchePhotons,
-                //        timeAvalanchePhotons, timeStep,
-                //        generatedParticles, timeAvalancheParticles,
-                //        eAvalancheParticles, bAvalancheParticles,
-                //        countProcessedPhotons + chunkNum * chunkSize, chunkSize, generatedPhotonsStart
-                //    );
-                //if (chunkRem != 0)
-                //    onePhotonStep(generatedPhotons,
-                //        eAvalanchePhotons, bAvalanchePhotons,
-                //        timeAvalanchePhotons, timeStep,
-                //        generatedParticles, timeAvalancheParticles,
-                //        eAvalancheParticles, bAvalancheParticles,
-                //        countProcessedPhotons + n - chunkRem, chunkRem, generatedPhotonsStart
-                //    );
-                onePhotonStep(generatedPhotons,
-                    eAvalanchePhotons, bAvalanchePhotons,
-                    timeAvalanchePhotons, timeStep,
-                    generatedParticles, timeAvalancheParticles,
-                    eAvalancheParticles, bAvalancheParticles,
-                    countProcessedPhotons, n, generatedPhotonsStart
-                );
+                nChunks = n / chunkSize;
+                chunkRem = n - nChunks * chunkSize;
+
+                for (int chunkNum = 0; chunkNum < nChunks; chunkNum++)
+                    onePhotonStep(generatedPhotons,
+                        eAvalanchePhotons, bAvalanchePhotons,
+                        timeAvalanchePhotons, timeStep,
+                        generatedParticles, timeAvalancheParticles,
+                        eAvalancheParticles, bAvalancheParticles,
+                        countProcessedPhotons + chunkNum * chunkSize, chunkSize,
+                        generatedPhotonsStart, threadId
+                    );
+                if (chunkRem != 0)
+                    onePhotonStep(generatedPhotons,
+                        eAvalanchePhotons, bAvalanchePhotons,
+                        timeAvalanchePhotons, timeStep,
+                        generatedParticles, timeAvalancheParticles,
+                        eAvalancheParticles, bAvalancheParticles,
+                        countProcessedPhotons + n - chunkRem, chunkRem,
+                        generatedPhotonsStart, threadId
+                    );
                 countProcessedPhotons = generatedPhotons.size();
             }
         }
@@ -404,129 +401,94 @@ namespace pfc
             VectorOfGenElements<FP>& timeAvalanchePhotons,
             VectorOfGenElements<FP3>& eAvalanchePhotons,
             VectorOfGenElements<FP3>& bAvalanchePhotons,
-            int begin, int size, int auxShift)
+            int begin, int size, int auxShift, const int threadId)
         {
-            /*
             const int end = begin + size;
             begin = sortHandledParticles(particles, timeStep, vtime, ve, vb, begin, end, auxShift);
 
             while (begin < end) {
-#pragma ivdep
-                for (int i = 0; i < end - begin; i++) {
 
-                    Particle3d& particle = particles[begin + i];
-                    FP& time = vtime[begin + i - auxShift];
-                    FP3& e = ve[begin + i - auxShift];
-                    FP3& b = vb[begin + i - auxShift];
+                FP chi[chunkSize], dt[chunkSize], gamma[chunkSize], rate[chunkSize],
+                    chi_new[chunkSize], delta[chunkSize], randomNumber[chunkSize];
+                Particle3d newPhoton[chunkSize];
 
-                    FP3 v = particle.getVelocity();
+                int s = begin, sAux = begin - auxShift;
+                size = end - begin;
 
-                    FP H_eff = sqr(e + ((FP)1 / Constants<FP>::lightVelocity()) * VP(v, b))
-                        - sqr(SP(e, v) / Constants<FP>::lightVelocity());
+                // compute dt
+                for (int i = 0; i < size; i++) {
+                    FP3 v = particles[s + i].getVelocity();
+                    FP H_eff = sqr(ve[sAux + i] + ((FP)1 / Constants<FP>::lightVelocity()) * VP(v, vb[sAux + i]))
+                        - sqr(SP(ve[sAux + i], v) / Constants<FP>::lightVelocity());
                     if (H_eff < 0) H_eff = 0;
                     H_eff = sqrt(H_eff);
-                    FP gamma = particle.getGamma();
-                    FP chi = gamma * H_eff / this->schwingerField;
-                    FP rate = (FP)0.0, dt = (FP)2 * timeStep;
-                    if (chi > 0.0 && this->photonEmissionEnabled)
+                    gamma[i] = particles[s + i].getGamma();
+                    chi[i] = gamma[i] * H_eff / this->schwingerField;
+                }
+
+                for (int i = 0; i < size; i++)  // NOT VECTORIZED: func call (random number)
+                    if (chi[i] > 0.0 && this->photonEmissionEnabled)
+                        randomNumber[i] = randomNumberOmp(threadId);
+
+                for (int i = 0; i < size; i++) {
+                    rate[i] = (FP)0.0;
+                    dt[i] = (FP)2 * timeStep;
+                    if (chi[i] > 0.0 && this->photonEmissionEnabled)
                     {
-                        rate = compton.rate(chi);
-                        dt = getDt(rate, chi, gamma);
-                    }
-
-                    if (dt + time > timeStep)
-                    {
-                        boris(particle, e, b, timeStep - time);
-                        time = timeStep;
-                    }
-                    else
-                    {
-                        boris(particle, e, b, dt);
-                        time += dt;
-
-                        FP3 v = particle.getVelocity();
-                        FP H_eff = sqr(e + ((FP)1 / Constants<FP>::lightVelocity()) * VP(v, b))
-                            - sqr(SP(e, v) / Constants<FP>::lightVelocity());
-                        if (H_eff < 0) H_eff = 0;
-                        H_eff = sqrt(H_eff);
-                        FP gamma = particle.getGamma();
-                        FP chi_new = gamma * H_eff / this->schwingerField;
-
-                        FP delta = photonGenerator((chi + chi_new) / (FP)2.0);
-
-                        Particle3d newPhoton;
-                        newPhoton.setType(Photon);
-                        newPhoton.setWeight(particle.getWeight());
-                        newPhoton.setPosition(particle.getPosition());
-                        newPhoton.setMomentum(delta * particle.getMomentum());
-
-                        generatedPhotons.push_back(newPhoton);
-                        timeAvalanchePhotons.push_back(time);
-                        eAvalanchePhotons.push_back(e);
-                        bAvalanchePhotons.push_back(b);
-
-                        particle.setMomentum(((FP)1 - delta) * particle.getMomentum());
+                        rate[i] = compton.rate(chi[i]);
+                        dt[i] = getDt(rate[i], chi[i], gamma[i], randomNumber[i]);
                     }
                 }
-                
-                begin = sortHandledParticles(particles, timeStep, vtime, ve, vb, begin, end, auxShift);
-            }
-            */
 
-            for (int i = 0; i < size; i++) {
-                Particle3d& particle = particles[begin + i];
-                FP& time = vtime[begin + i - auxShift];
-                FP3& e = ve[begin + i - auxShift];
-                FP3& b = vb[begin + i - auxShift];
+                // move particles
+                for (int i = 0; i < size; i++) {
+                    bool cond = dt[i] + vtime[sAux + i] > timeStep;
+                    FP realDt = cond ? timeStep - vtime[sAux + i] : dt[i];
+                    boris(particles[s + i], ve[sAux + i], vb[sAux + i], realDt);
+                    vtime[sAux + i] = cond ? timeStep : vtime[sAux + i] + dt[i];
+                }
 
-                while (time < timeStep)
-                {
-                    FP3 v = particle.getVelocity();
+                // eliminate finished particles
+                int newBegin = sortHandledParticles(particles, timeStep, vtime, ve, vb,
+                    begin, end, auxShift, chi);
+                int elimShift = newBegin - begin;
+                begin = newBegin;
+                s = begin;
+                sAux = begin - auxShift;
+                size = end - begin;
 
-                    FP H_eff = sqr(e + ((FP)1 / Constants<FP>::lightVelocity()) * VP(v, b))
-                        - sqr(SP(e, v) / Constants<FP>::lightVelocity());
+                // process other particles
+                for (int i = 0; i < size; i++)  // NOT VECTORIZED: func call (random number)
+                    randomNumber[i] = randomNumberOmp(threadId);
+
+                for (int i = 0; i < size; i++) {
+                    FP3 v = particles[s + i].getVelocity();
+                    FP H_eff = sqr(ve[sAux + i] + ((FP)1 / Constants<FP>::lightVelocity()) * VP(v, vb[sAux + i]))
+                        - sqr(SP(ve[sAux + i], v) / Constants<FP>::lightVelocity());
                     if (H_eff < 0) H_eff = 0;
                     H_eff = sqrt(H_eff);
-                    FP gamma = particle.getGamma();
-                    FP chi = gamma * H_eff / this->schwingerField;
-                    FP rate = (FP)0.0, dt = (FP)2 * timeStep;
-                    if (chi > 0.0 && this->photonEmissionEnabled)
-                    {
-                        rate = compton.rate(chi);
-                        dt = getDt(rate, chi, gamma);
-                    }
+                    FP gamma = particles[s + i].getGamma();
+                    chi_new[i] = gamma * H_eff / this->schwingerField;
+                }
 
-                    if (dt + time > timeStep)
-                    {
-                        boris(particle, e, b, timeStep - time);
-                        time = timeStep;
-                    }
-                    else
-                    {
-                        boris(particle, e, b, dt);
-                        time += dt;
+                for (int i = 0; i < size; i++) {
+                    delta[i] = photonGenerator((chi[i + elimShift] + chi_new[i]) / (FP)2.0, randomNumber[i]);
+                }
 
-                        FP3 v = particle.getVelocity();
-                        FP H_eff = sqr(e + ((FP)1 / Constants<FP>::lightVelocity()) * VP(v, b))
-                            - sqr(SP(e, v) / Constants<FP>::lightVelocity());
-                        if (H_eff < 0) H_eff = 0;
-                        H_eff = sqrt(H_eff);
-                        FP gamma = particle.getGamma();
-                        FP chi_new = gamma * H_eff / this->schwingerField;
+                for (int i = 0; i < size; i++) {
+                    newPhoton[i].setType(Photon);
+                    newPhoton[i].setWeight(particles[s + i].getWeight());
+                    newPhoton[i].setPosition(particles[s + i].getPosition());
+                    newPhoton[i].setMomentum(delta[i] * particles[s + i].getMomentum());
+                }
 
-                        FP delta = photonGenerator((chi + chi_new) / (FP)2.0);
+                generatedPhotons.extend(newPhoton, size);
+                timeAvalanchePhotons.extend(vtime.data() + sAux, size);
+                eAvalanchePhotons.extend(ve.data() + sAux, size);
+                bAvalanchePhotons.extend(vb.data() + sAux, size);
 
-                        Particle3d newPhoton;
-                        newPhoton.setType(Photon);
-                        newPhoton.setWeight(particle.getWeight());
-                        newPhoton.setPosition(particle.getPosition());
-                        newPhoton.setMomentum(delta * particle.getMomentum());
-
-                        generatedPhotons.push_back(newPhoton);
-                        timeAvalanchePhotons.push_back(time);
-
-                        particle.setMomentum(((FP)1 - delta) * particle.getMomentum());
-                    }
+                for (int i = 0; i < size; i++) {
+                    particles[s + i].setMomentum(((FP)1 - delta[i]) * particles[s + i].getMomentum());
                 }
             }
         }
@@ -538,126 +500,100 @@ namespace pfc
             VectorOfGenElements<FP>& timeAvalancheParticles,
             VectorOfGenElements<FP3>& eAvalancheParticles,
             VectorOfGenElements<FP3>& bAvalancheParticles,
-            int begin, int size, int auxShift)
+            int begin, int size, int auxShift, const int threadId)
         {
-            /*
-#pragma ivdep
+            FP3 k_[chunkSize];
+            FP chi[chunkSize], dt[chunkSize], gamma[chunkSize], rate[chunkSize],
+                delta[chunkSize], randomNumber[chunkSize];
+            Particle3d newParticle[chunkSize];
+
+            int s = begin, sAux = begin - auxShift;
+
+            // compute dt
             for (int i = 0; i < size; i++) {
-
-                Particle3d& photon = photons[begin + i];
-                FP& time = vtime[begin + i - auxShift];
-                FP3& e = ve[begin + i - auxShift];
-                FP3& b = vb[begin + i - auxShift];
-
-                FP3 k_ = photon.getVelocity();
-                k_ = ((FP)1 / k_.norm()) * k_; // normalized wave vector
-                FP H_eff = sqrt(sqr(e + VP(k_, b)) - sqr(SP(e, k_)));
-                FP gamma = photon.getMomentum().norm()
+                k_[i] = photons[s + i].getVelocity();
+                k_[i] = ((FP)1 / k_[i].norm()) * k_[i]; // normalized wave vector
+                FP H_eff = sqrt(sqr(ve[sAux + i] + VP(k_[i], vb[sAux + i])) - sqr(SP(ve[sAux + i], k_[i])));
+                gamma[i] = photons[s + i].getMomentum().norm()
                     / (Constants<FP>::electronMass() * Constants<FP>::lightVelocity());
-                FP chi = gamma * H_eff / this->schwingerField;
+                chi[i] = gamma[i] * H_eff / this->schwingerField;
+            }
 
-                FP rate = 0.0, dt = (FP)2 * timeStep;
-                if (chi > 0.0 && this->pairProductionEnabled)
+            for (int i = 0; i < size; i++)  // NOT VECTORIZED: func call (random number)
+                if (chi[i] > 0.0 && this->pairProductionEnabled)
+                    randomNumber[i] = randomNumberOmp(threadId);
+
+            for (int i = 0; i < size; i++) {
+                rate[i] = 0.0;
+                dt[i] = (FP)2 * timeStep;
+                if (chi[i] > 0.0 && this->pairProductionEnabled)
                 {
-                    rate = breit_wheeler.rate(chi);
-                    dt = getDt(rate, chi, gamma);
-                }
-
-                if (dt + time > timeStep)
-                {
-                    photon.setPosition(photon.getPosition()
-                        + (timeStep - time) * Constants<FP>::lightVelocity() * k_);
-                    time = timeStep;
-                }
-                else
-                {
-                    photon.setPosition(photon.getPosition()
-                        + dt * Constants<FP>::lightVelocity() * k_);
-                    time += dt;
-                    FP delta = pairGenerator(chi);
-
-                    Particle3d newParticle;
-                    newParticle.setType(Electron);
-                    newParticle.setWeight(photon.getWeight());
-                    newParticle.setPosition(photon.getPosition());
-                    newParticle.setMomentum(delta * photon.getMomentum());
-
-                    generatedParticles.push_back(newParticle);
-                    timeAvalancheParticles.push_back(time);
-                    eAvalancheParticles.push_back(e);
-                    bAvalancheParticles.push_back(b);
-
-                    newParticle.setType(Positron);
-                    newParticle.setMomentum(((FP)1 - delta) * photon.getMomentum());
-
-                    generatedParticles.push_back(newParticle);
-                    timeAvalancheParticles.push_back(time);
-                    eAvalancheParticles.push_back(e);
-                    bAvalancheParticles.push_back(b);
-
-                    photon.setP((FP)0.0 * photon.getP());  // mark old photon as deleted
-                    time = timeStep;
+                    rate[i] = breit_wheeler.rate(chi[i]);
+                    dt[i] = getDt(rate[i], chi[i], gamma[i], randomNumber[i]);
                 }
             }
-            */
+
+            // move photons
+            for (int i = 0; i < size; i++) {
+                bool cond = dt[i] + vtime[sAux + i] > timeStep;
+                FP realDt = cond ? timeStep - vtime[sAux + i] : dt[i];
+                photons[s + i].setPosition(photons[s + i].getPosition()
+                    + realDt * Constants<FP>::lightVelocity() * k_[i]);
+                vtime[sAux + i] = cond ? timeStep : vtime[sAux + i] + dt[i];
+            }
+
+            // eliminate finished photons
+            int newBegin = sortHandledParticles(photons, timeStep, vtime, ve, vb,
+                begin, begin + size, auxShift, chi);
+            int elimShift = newBegin - begin;
+            size -= elimShift;
+            begin = newBegin;
+            s = begin;
+            sAux = begin - auxShift;
+
+            // process other particles
+            for (int i = 0; i < size; i++) // NOT VECTORIZED: func call (random number)
+                randomNumber[i] = randomNumberOmp(threadId);
 
             for (int i = 0; i < size; i++) {
-                Particle3d& photon = photons[begin + i];
-                FP& time = vtime[begin + i - auxShift];
-                FP3& e = ve[begin + i - auxShift];
-                FP3& b = vb[begin + i - auxShift];
+                delta[i] = pairGenerator(chi[i + elimShift], randomNumber[i]);  // unrolled inner loop
+            }
 
-                FP3 k_ = photon.getVelocity();
-                k_ = ((FP)1 / k_.norm()) * k_; // normalized wave vector
-                FP H_eff = sqrt(sqr(e + VP(k_, b)) - sqr(SP(e, k_)));
-                FP gamma = photon.getMomentum().norm()
-                    / (Constants<FP>::electronMass() * Constants<FP>::lightVelocity());
-                FP chi = gamma * H_eff / this->schwingerField;
+            for (int i = 0; i < size; i++) {
+                newParticle[i].setType(Electron);
+                newParticle[i].setWeight(photons[s + i].getWeight());
+                newParticle[i].setPosition(photons[s + i].getPosition());
+                newParticle[i].setMomentum(delta[i] * photons[s + i].getMomentum());
+            }
 
-                FP rate = 0.0, dt = (FP)2 * timeStep;
-                if (chi > 0.0 && this->pairProductionEnabled)
-                {
-                    rate = breit_wheeler.rate(chi);
-                    dt = getDt(rate, chi, gamma);
-                }
+            generatedParticles.extend(newParticle, size);
+            timeAvalancheParticles.extend(vtime.data() + sAux, size);
+            eAvalancheParticles.extend(ve.data() + sAux, size);
+            bAvalancheParticles.extend(vb.data() + sAux, size);
 
-                if (dt + time > timeStep)
-                {
-                    photon.setPosition(photon.getPosition()
-                        + (timeStep - time) * Constants<FP>::lightVelocity() * k_);
-                    time = timeStep;
-                }
-                else
-                {
-                    photon.setPosition(photon.getPosition()
-                        + dt * Constants<FP>::lightVelocity() * k_);
-                    time += dt;
-                    FP delta = pairGenerator(chi);
+            for (int i = 0; i < size; i++) {
+                newParticle[i].setType(Positron);
+                newParticle[i].setMomentum(((FP)1 - delta[i]) * photons[s + i].getMomentum());
+            }
 
-                    Particle3d newParticle;
-                    newParticle.setType(Electron);
-                    newParticle.setWeight(photon.getWeight());
-                    newParticle.setPosition(photon.getPosition());
-                    newParticle.setMomentum(delta * photon.getMomentum());
+            generatedParticles.extend(newParticle, size);
+            timeAvalancheParticles.extend(vtime.data() + sAux, size);
+            eAvalancheParticles.extend(ve.data() + sAux, size);
+            bAvalancheParticles.extend(vb.data() + sAux, size);
 
-                    generatedParticles.push_back(newParticle);
-                    timeAvalancheParticles.push_back(time);
+            for (int i = 0; i < size; i++) {
+                vtime[sAux + i] = timeStep;
+            }
 
-                    newParticle.setType(Positron);
-                    newParticle.setMomentum(((FP)1 - delta) * photon.getMomentum());
-
-                    generatedParticles.push_back(newParticle);
-                    timeAvalancheParticles.push_back(time);
-
-                    photon.setP((FP)0.0 * photon.getP());  // mark old photon as deleted
-                    time = timeStep;
-                }
+            for (int i = 0; i < size; i++) {  // NOT VECTORIZED: strange function call, unrolled
+                // mark old photon as deleted
+                photons[s + i].setP(Particle3d::MomentumType());  // there is a function call here because of zero arg
             }
         }
 
         forceinline int sortHandledParticles(VectorOfGenElements<Particle3d>& particles, FP timeStep,
             VectorOfGenElements<FP>& vtime, VectorOfGenElements<FP3>& ve, VectorOfGenElements<FP3>& vb,
-            int begin, int end, int auxShift)
+            int begin, int end, int auxShift, FP* const chi = nullptr)
         {
             int lastIndex = begin;
             for (int i = begin; i < end; i++)
@@ -667,6 +603,7 @@ namespace pfc
                         std::swap(vtime[i - auxShift], vtime[lastIndex - auxShift]);
                         std::swap(ve[i - auxShift], ve[lastIndex - auxShift]);
                         std::swap(vb[i - auxShift], vb[lastIndex - auxShift]);
+                        if (chi) std::swap(chi[i - begin], chi[lastIndex - begin]);
                     }
                     lastIndex++;
                 }
@@ -690,10 +627,9 @@ namespace pfc
             VectorOfGenElements<Particle3d>& generatedParticles,
             int begin1, int begin2, int size)
         {
-            // save new position and momentum of the current particles
-            for (int i = 0; i < size; i++) {
+            // replace old particles with new particles
+            for (int i = 0; i < size; i++)
                 particles[begin1 + i] = generatedParticles[begin2 + i];
-            }
             // pop double particles
             int nMove = generatedParticles.size() - (begin2 + size) <= size ?
                 generatedParticles.size() - (begin2 + size) : size;
@@ -703,26 +639,46 @@ namespace pfc
             generatedParticles.decrease(generatedParticles.size() - size);
         }
 
-        forceinline FP getDt(FP rate, FP chi, FP gamma)
+        //forceinline FP getDt(FP rate, FP chi, FP gamma)
+        //{
+        //    FP r = -log(randomNumberOmp());
+        //    r *= gamma / chi;
+        //    return r / rate;
+        //}
+
+        forceinline FP getDt(FP rate, FP chi, FP gamma, FP randomNumber)
         {
-            FP r = -log(randomNumberOmp());
+            FP r = -log(randomNumber);
             r *= gamma / chi;
             return r / rate;
         }
 
-        forceinline FP photonGenerator(FP chi)
+        //forceinline FP photonGenerator(FP chi)
+        //{
+        //    FP r = randomNumberOmp();
+        //    return compton.inv_cdf(r, chi);
+        //}
+
+        forceinline FP photonGenerator(FP chi, FP randomNumber)
         {
-            FP r = randomNumberOmp();
-            return compton.inv_cdf(r, chi);
+            return compton.inv_cdf(randomNumber, chi);
         }
 
-        forceinline FP pairGenerator(FP chi)
+        //forceinline FP pairGenerator(FP chi)
+        //{
+        //    FP r = randomNumberOmp();
+        //    if (r < (FP)0.5)
+        //        return breit_wheeler.inv_cdf(r, chi);
+        //    else
+        //        return (FP)1.0 - breit_wheeler.inv_cdf((FP)1.0 - r, chi);
+        //}
+
+        forceinline FP pairGenerator(FP chi, FP randomNumber)
         {
-            FP r = randomNumberOmp();
-            if (r < (FP)0.5)
-                return breit_wheeler.inv_cdf(r, chi);
+            if (randomNumber < (FP)0.5)
+                return breit_wheeler.inv_cdf(randomNumber, chi);
             else
-                return (FP)1.0 - breit_wheeler.inv_cdf((FP)1.0 - r, chi);
+                return (FP)1.0 - breit_wheeler.inv_cdf((FP)1.0 - randomNumber, chi);
         }
 
         void operator()(ParticleProxy3d* particle, ValueField field, FP timeStep)
@@ -739,9 +695,15 @@ namespace pfc
 
     private:
 
-        forceinline FP randomNumberOmp()
+        //forceinline FP randomNumberOmp()
+        //{
+        //    int threadId = OMP_GET_THREAD_NUM();
+        //    return distribution[threadId](randGenerator[threadId]);
+        //}
+
+        forceinline FP randomNumberOmp(const int threadId)
         {
-            int threadId = OMP_GET_THREAD_NUM();
+            //int threadId = OMP_GET_THREAD_NUM();
             return distribution[threadId](randGenerator[threadId]);
         }
 

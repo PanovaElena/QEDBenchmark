@@ -80,20 +80,6 @@ namespace pfc {
             this->setType(particleProxy.getType());
         }
 
-        // !!!!!
-        Particle(const Particle& particle) :
-            position(particle.position), p(particle.p), weight(particle.weight),
-            gamma(particle.gamma), typeIndex(particle.typeIndex) {}
-        forceinline Particle& operator=(const Particle& particle)
-        {
-            position = particle.position;
-            p = particle.p;
-            weight = particle.weight;
-            gamma = particle.gamma;
-            typeIndex = particle.typeIndex;
-            return *this;
-        }
-
         //PositionTypeProxy& getProxyPosition() { return PositionTypeProxy(position); } //only advanced users
         forceinline PositionType getPosition() const { return position; }
         forceinline void setPosition(const PositionType& newPosition) { position = newPosition; }
@@ -215,6 +201,13 @@ namespace pfc {
             this->gamma = particle.gamma;
             return *this;
         }
+
+        ~ParticleProxy() {}
+
+        //ParticleProxy(ParticleProxy<dimension>& particle) :
+        //    position(particle.position), weight(particle.weight), typeIndex(particle.typeIndex),
+        //    p(particle.p), gamma(particle.gamma)
+        //{}
 
         forceinline PositionTypeProxy& getProxyPosition() { return position; } //only advanced users
         forceinline PositionType getPosition() { return position.toVector(); }

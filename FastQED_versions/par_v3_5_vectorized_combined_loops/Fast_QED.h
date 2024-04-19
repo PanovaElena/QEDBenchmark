@@ -25,51 +25,42 @@ namespace pfc
         static const int chunkSize = int(__CHUNK_SIZE__);
 
         template <class T>
-        struct VectorOfGenElements {
-            constexpr static int factor = 2;
+        class VectorOfGenElements {
+            static const int factor = 2;
 
             int n = 0, capacity = chunkSize;
-            std::vector<T> data;
-            T* raw = nullptr;
+            std::vector<T> elements;
 
-            VectorOfGenElements() : data(capacity), raw(data.data()) {}
+        public:
 
-            forceinline T& operator[](int i) { return raw[i]; }
-            forceinline const T& operator[](int i) const { return raw[i]; }
+            VectorOfGenElements() : elements(capacity) {}
+
+            forceinline T& operator[](int i) { return elements[i]; }
+            forceinline const T& operator[](int i) const { return elements[i]; }
 
             forceinline int& size() { return n; }
             forceinline void clear() { n = 0; }
-            forceinline T* ptr() { return raw; }
+            forceinline T* data() { return elements.data(); }
 
-            forceinline void resize() {
-                data.resize(capacity);
-                raw = data.data();
-            }
-            forceinline void reserve(int size) {  // size <= chunkSize
-                if (n + size >= capacity) capacity *= factor;
-                resize();
+            forceinline void decrease(int newSize) { n = newSize; }
+
+            forceinline void increaseCapacity(int newCapacity) {
+                elements.resize(newCapacity);
+                capacity = newCapacity;
             }
 
             forceinline void push_back(const T& value) {
-                if (n == capacity) {
-                    capacity *= factor;
-                    resize();
-                }
-                raw[n++] = value;
+                if (n == capacity) increaseCapacity(factor * capacity);
+                elements[n++] = value;
             }
-            forceinline void push_back_without_reserve(const T& value) {
-                raw[n++] = value;
+            forceinline void extend(const T* values, int size) {
+                while (n + size >= capacity) increaseCapacity(factor * capacity);
+#pragma omp simd
+                for (int i = 0; i < size; i++)
+                    elements[n + i] = values[i];
+                n += size;
             }
-
-            forceinline void changeSize(int newSize) { n = newSize; }  // without resize!
             forceinline void pop_back() { n--; }
-
-            forceinline void removeElement(int index) {
-                if (index < n - 1)
-                    std::swap(raw[index], raw[n - 1]);
-                pop_back();
-            }
-
         };
 
         Scalar_Fast_QED() : compton(), breit_wheeler(),
@@ -474,11 +465,6 @@ namespace pfc
                 size = end - begin;
 
                 // process other particles
-                generatedPhotons.reserve(size);
-                timeAvalanchePhotons.reserve(size);
-                eAvalanchePhotons.reserve(size);
-                bAvalanchePhotons.reserve(size);
-
 #pragma ivdep
                 for (int i = 0; i < size; i++)  // NOT VECTORIZED: func call (random number)
                     randomNumber[i] = randomNumberOmp(threadId);
@@ -492,19 +478,28 @@ namespace pfc
                     H_eff = sqrt(H_eff);
                     FP gamma = particles[s + i].getGamma();
                     chi_new[i] = gamma * H_eff / this->schwingerField;
+                }
 
+#pragma omp simd
+                for (int i = 0; i < size; i++) {
                     delta[i] = photonGenerator((chi[i + elimShift] + chi_new[i]) / (FP)2.0, randomNumber[i]);
+                }
 
+#pragma omp simd
+                for (int i = 0; i < size; i++) {
                     newPhoton[i].setType(Photon);
                     newPhoton[i].setWeight(particles[s + i].getWeight());
                     newPhoton[i].setPosition(particles[s + i].getPosition());
                     newPhoton[i].setMomentum(delta[i] * particles[s + i].getMomentum());
+                }
 
-                    generatedPhotons.push_back_without_reserve(newPhoton[i]);
-                    timeAvalanchePhotons.push_back_without_reserve(vtime[sAux + i]);
-                    eAvalanchePhotons.push_back_without_reserve(ve[sAux + i]);
-                    bAvalanchePhotons.push_back_without_reserve(vb[sAux + i]);
+                generatedPhotons.extend(newPhoton, size);
+                timeAvalanchePhotons.extend(vtime.data() + sAux, size);
+                eAvalanchePhotons.extend(ve.data() + sAux, size);
+                bAvalanchePhotons.extend(vb.data() + sAux, size);
 
+#pragma omp simd
+                for (int i = 0; i < size; i++) {
                     particles[s + i].setMomentum(((FP)1 - delta[i]) * particles[s + i].getMomentum());
                 }
             }
@@ -576,11 +571,6 @@ namespace pfc
             sAux = begin - auxShift;
 
             // process other particles
-            generatedParticles.reserve(2 * size);
-            timeAvalancheParticles.reserve(2 * size);
-            eAvalancheParticles.reserve(2 * size);
-            bAvalancheParticles.reserve(2 * size);
-
 #pragma ivdep
             for (int i = 0; i < size; i++) // NOT VECTORIZED: func call (random number)
                 randomNumber[i] = randomNumberOmp(threadId);
@@ -588,25 +578,34 @@ namespace pfc
 #pragma omp simd
             for (int i = 0; i < size; i++) {
                 delta[i] = pairGenerator(chi[i + elimShift], randomNumber[i]);  // unrolled inner loop
+            }
 
+#pragma omp simd
+            for (int i = 0; i < size; i++) {
                 newParticle[i].setType(Electron);
                 newParticle[i].setWeight(photons[s + i].getWeight());
                 newParticle[i].setPosition(photons[s + i].getPosition());
                 newParticle[i].setMomentum(delta[i] * photons[s + i].getMomentum());
+            }
 
-                generatedParticles.push_back_without_reserve(newParticle[i]);
-                timeAvalancheParticles.push_back_without_reserve(vtime[sAux + i]);
-                eAvalancheParticles.push_back_without_reserve(ve[sAux + i]);
-                bAvalancheParticles.push_back_without_reserve(vb[sAux + i]);
+            generatedParticles.extend(newParticle, size);
+            timeAvalancheParticles.extend(vtime.data() + sAux, size);
+            eAvalancheParticles.extend(ve.data() + sAux, size);
+            bAvalancheParticles.extend(vb.data() + sAux, size);
 
+#pragma omp simd
+            for (int i = 0; i < size; i++) {
                 newParticle[i].setType(Positron);
                 newParticle[i].setMomentum(((FP)1 - delta[i]) * photons[s + i].getMomentum());
+            }
 
-                generatedParticles.push_back_without_reserve(newParticle[i]);
-                timeAvalancheParticles.push_back_without_reserve(vtime[sAux + i]);
-                eAvalancheParticles.push_back_without_reserve(ve[sAux + i]);
-                bAvalancheParticles.push_back_without_reserve(vb[sAux + i]);
+            generatedParticles.extend(newParticle, size);
+            timeAvalancheParticles.extend(vtime.data() + sAux, size);
+            eAvalancheParticles.extend(ve.data() + sAux, size);
+            bAvalancheParticles.extend(vb.data() + sAux, size);
 
+#pragma omp simd
+            for (int i = 0; i < size; i++) {
                 vtime[sAux + i] = timeStep;
             }
 
@@ -647,25 +646,23 @@ namespace pfc
                         std::swap(generatedPhotons[k], generatedPhotons[lastIndex]);
                     lastIndex++;
                 }
-            generatedPhotons.changeSize(lastIndex);
+            generatedPhotons.decrease(lastIndex);
         }
 
         forceinline void removeDoubleParticles(ParticleArray3d& particles,
             VectorOfGenElements<Particle3d>& generatedParticles,
             int begin1, int begin2, int size)
         {
-            // save new position and momentum of the current particles
-            for (int i = 0; i < size; i++) {
-                particles[begin1 + i].setMomentum(generatedParticles[begin2 + i].getMomentum());
-                particles[begin1 + i].setPosition(generatedParticles[begin2 + i].getPosition());
-            }
+            // replace old particles with new particles
+            for (int i = 0; i < size; i++)
+                particles[begin1 + i] = generatedParticles[begin2 + i];
             // pop double particles
             int nMove = generatedParticles.size() - (begin2 + size) <= size ?
                 generatedParticles.size() - (begin2 + size) : size;
             for (int j = 0; j < nMove; j++)
                 std::swap(generatedParticles[j + begin2],
                     generatedParticles[generatedParticles.size() - nMove + j]);
-            generatedParticles.changeSize(generatedParticles.size() - size);
+            generatedParticles.decrease(generatedParticles.size() - size);
         }
 
         //forceinline FP getDt(FP rate, FP chi, FP gamma)

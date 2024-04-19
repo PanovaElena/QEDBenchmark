@@ -193,10 +193,14 @@ namespace pfc {
             p(particle.p), gamma(particle.gamma)
         {}
 
-        //ParticleProxy(ParticleProxy<dimension>& particle) :
-        //    position(particle.position), weight(particle.weight), typeIndex(particle.typeIndex),
-        //    p(particle.p), gamma(particle.gamma)
-        //{}
+        ParticleProxy& operator=(Particle<dimension>& particle) {  // !!!!!!!
+            this->position = particle.position;
+            this->weight = particle.weight;
+            this->typeIndex = particle.typeIndex;
+            this->p = particle.p;
+            this->gamma = particle.gamma;
+            return *this;
+        }
 
         forceinline PositionTypeProxy& getProxyPosition() { return position; } //only advanced users
         forceinline PositionType getPosition() { return position.toVector(); }

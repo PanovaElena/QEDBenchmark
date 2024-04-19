@@ -24,41 +24,6 @@ namespace pfc
 
         static const int chunkSize = int(__CHUNK_SIZE__);
 
-        template <class T>
-        struct VectorOfGenElements {
-            static const int factor = 2;
-
-            int n = 0, capacity = chunkSize;
-            std::vector<T> data;
-
-            VectorOfGenElements() : data(capacity) {}
-
-            forceinline T& operator[](int i) { return data[i]; }
-            forceinline const T& operator[](int i) const { return data[i]; }
-
-            forceinline int& size() { return n; }
-            forceinline void clear() { n = 0; }
-
-            forceinline void decrease(int newSize) { n = newSize; }
-
-            forceinline void increaseCapacity(int newCapacity) {
-                data.resize(newCapacity);
-                capacity = newCapacity;
-            }
-            forceinline void reserveAdditional(int size) {  // size <= chunkSize
-                while (n + size >= capacity) increaseCapacity(factor * capacity);
-            }
-
-            forceinline void push_back(const T& value) {
-                if (n == capacity) increaseCapacity(factor * capacity);
-                data[n++] = value;
-            }
-            forceinline void push_back_reserved(const T& value) {
-                data[n++] = value;
-            }
-            forceinline void pop_back() { n--; }
-        };
-
         Scalar_Fast_QED() : compton(), breit_wheeler(),
             schwingerField(sqr(Constants<FP>::electronMass()* Constants<FP>::lightVelocity())
                 * Constants<FP>::lightVelocity() / (-Constants<FP>::electronCharge() * Constants<FP>::planck()))
@@ -98,8 +63,8 @@ namespace pfc
         {
             int maxThreads = OMP_GET_MAX_THREADS();
 
-            std::vector<VectorOfGenElements<Particle3d>> generatedParticles(maxThreads);
-            std::vector<VectorOfGenElements<Particle3d>> generatedPhotons(maxThreads);
+            std::vector<std::vector<Particle3d>> generatedParticles(maxThreads);
+            std::vector<std::vector<Particle3d>> generatedPhotons(maxThreads);
 
             if ((*particles)[Photon].size())
                 handlePhotons((*particles)[Photon], e[0], b[0], timeStep, generatedParticles, generatedPhotons);
@@ -150,18 +115,18 @@ namespace pfc
 
         void handlePhotons(ParticleArray3d& photons,
             const std::vector<FP3>& ve, const std::vector<FP3>& vb, FP timeStep,
-            std::vector<VectorOfGenElements<Particle3d>>& generatedParticlesThread,
-            std::vector<VectorOfGenElements<Particle3d>>& generatedPhotonsThread)
+            std::vector<std::vector<Particle3d>>& generatedParticlesThread,
+            std::vector<std::vector<Particle3d>>& generatedPhotonsThread)
         {
             int maxThreads = OMP_GET_MAX_THREADS();
 
-            std::vector<VectorOfGenElements<FP>> timeAvalancheParticlesThread(maxThreads);
-            std::vector<VectorOfGenElements<FP>> timeAvalanchePhotonsThread(maxThreads);
+            std::vector<std::vector<FP>> timeAvalancheParticlesThread(maxThreads);
+            std::vector<std::vector<FP>> timeAvalanchePhotonsThread(maxThreads);
 
-            std::vector<VectorOfGenElements<FP3>> eAvalancheParticlesThread(maxThreads);
-            std::vector<VectorOfGenElements<FP3>> eAvalanchePhotonsThread(maxThreads);
-            std::vector<VectorOfGenElements<FP3>> bAvalancheParticlesThread(maxThreads);
-            std::vector<VectorOfGenElements<FP3>> bAvalanchePhotonsThread(maxThreads);
+            std::vector<std::vector<FP3>> eAvalancheParticlesThread(maxThreads);
+            std::vector<std::vector<FP3>> eAvalanchePhotonsThread(maxThreads);
+            std::vector<std::vector<FP3>> bAvalancheParticlesThread(maxThreads);
+            std::vector<std::vector<FP3>> bAvalanchePhotonsThread(maxThreads);
 
             const int n = photons.size();
             if (n == 0) return;
@@ -196,18 +161,18 @@ namespace pfc
 
         void handleParticles(ParticleArray3d& particles,
             const std::vector<FP3>& ve, const std::vector<FP3>& vb, FP timeStep,
-            std::vector<VectorOfGenElements<Particle3d>>& generatedParticlesThread,
-            std::vector<VectorOfGenElements<Particle3d>>& generatedPhotonsThread)
+            std::vector<std::vector<Particle3d>>& generatedParticlesThread,
+            std::vector<std::vector<Particle3d>>& generatedPhotonsThread)
         {
             int maxThreads = OMP_GET_MAX_THREADS();
 
-            std::vector<VectorOfGenElements<FP>> timeAvalancheParticlesThread(maxThreads);
-            std::vector<VectorOfGenElements<FP>> timeAvalanchePhotonsThread(maxThreads);
+            std::vector<std::vector<FP>> timeAvalancheParticlesThread(maxThreads);
+            std::vector<std::vector<FP>> timeAvalanchePhotonsThread(maxThreads);
 
-            std::vector<VectorOfGenElements<FP3>> eAvalancheParticlesThread(maxThreads);
-            std::vector<VectorOfGenElements<FP3>> eAvalanchePhotonsThread(maxThreads);
-            std::vector<VectorOfGenElements<FP3>> bAvalancheParticlesThread(maxThreads);
-            std::vector<VectorOfGenElements<FP3>> bAvalanchePhotonsThread(maxThreads);
+            std::vector<std::vector<FP3>> eAvalancheParticlesThread(maxThreads);
+            std::vector<std::vector<FP3>> eAvalanchePhotonsThread(maxThreads);
+            std::vector<std::vector<FP3>> bAvalancheParticlesThread(maxThreads);
+            std::vector<std::vector<FP3>> bAvalanchePhotonsThread(maxThreads);
 
             const int n = particles.size();
             if (n == 0) return;
@@ -242,14 +207,14 @@ namespace pfc
 
         forceinline void handlePhotonChunk(ParticleArray3d& photons,
             const std::vector<FP3>& ve, const std::vector<FP3>& vb, FP timeStep,
-            VectorOfGenElements<Particle3d>& generatedParticles,
-            VectorOfGenElements<Particle3d>& generatedPhotons,
-            VectorOfGenElements<FP>& timeAvalancheParticles,
-            VectorOfGenElements<FP>& timeAvalanchePhotons,
-            VectorOfGenElements<FP3>& eAvalancheParticles,
-            VectorOfGenElements<FP3>& bAvalancheParticles,
-            VectorOfGenElements<FP3>& eAvalanchePhotons,
-            VectorOfGenElements<FP3>& bAvalanchePhotons,
+            std::vector<Particle3d>& generatedParticles,
+            std::vector<Particle3d>& generatedPhotons,
+            std::vector<FP>& timeAvalancheParticles,
+            std::vector<FP>& timeAvalanchePhotons,
+            std::vector<FP3>& eAvalancheParticles,
+            std::vector<FP3>& bAvalancheParticles,
+            std::vector<FP3>& eAvalanchePhotons,
+            std::vector<FP3>& bAvalanchePhotons,
             const int begin, const int end, const int threadId
         )
         {
@@ -284,14 +249,14 @@ namespace pfc
 
         forceinline void handleParticleChunk(ParticleArray3d& particles,
             const std::vector<FP3>& ve, const std::vector<FP3>& vb, FP timeStep,
-            VectorOfGenElements<Particle3d>& generatedParticles,
-            VectorOfGenElements<Particle3d>& generatedPhotons,
-            VectorOfGenElements<FP>& timeAvalancheParticles,
-            VectorOfGenElements<FP>& timeAvalanchePhotons,
-            VectorOfGenElements<FP3>& eAvalancheParticles,
-            VectorOfGenElements<FP3>& bAvalancheParticles,
-            VectorOfGenElements<FP3>& eAvalanchePhotons,
-            VectorOfGenElements<FP3>& bAvalanchePhotons,
+            std::vector<Particle3d>& generatedParticles,
+            std::vector<Particle3d>& generatedPhotons,
+            std::vector<FP>& timeAvalancheParticles,
+            std::vector<FP>& timeAvalanchePhotons,
+            std::vector<FP3>& eAvalancheParticles,
+            std::vector<FP3>& bAvalancheParticles,
+            std::vector<FP3>& eAvalanchePhotons,
+            std::vector<FP3>& bAvalanchePhotons,
             const int begin, const int end, const int threadId
         )
         {
@@ -328,10 +293,10 @@ namespace pfc
         }
 
         void runAvalanche(const std::vector<FP3>& ve, const std::vector<FP3>& vb, FP timeStep,
-            VectorOfGenElements<Particle3d>& generatedParticles, VectorOfGenElements<FP>& timeAvalancheParticles,
-            VectorOfGenElements<FP3>& eAvalancheParticles, VectorOfGenElements<FP3>& bAvalancheParticles,
-            VectorOfGenElements<Particle3d>& generatedPhotons, VectorOfGenElements<FP>& timeAvalanchePhotons,
-            VectorOfGenElements<FP3>& eAvalanchePhotons, VectorOfGenElements<FP3>& bAvalanchePhotons,
+            std::vector<Particle3d>& generatedParticles, std::vector<FP>& timeAvalancheParticles,
+            std::vector<FP3>& eAvalancheParticles, std::vector<FP3>& bAvalancheParticles,
+            std::vector<Particle3d>& generatedPhotons, std::vector<FP>& timeAvalanchePhotons,
+            std::vector<FP3>& eAvalanchePhotons, std::vector<FP3>& bAvalanchePhotons,
             int generatedParticlesStart, int generatedPhotonsStart, const int threadId)
         {
             int countProcessedParticles = generatedParticlesStart;
@@ -390,13 +355,13 @@ namespace pfc
             }
         }
 
-        void oneParticleStep(VectorOfGenElements<Particle3d>& particles,
-            VectorOfGenElements<FP3>& ve, VectorOfGenElements<FP3>& vb,
-            VectorOfGenElements<FP>& vtime, FP timeStep,
-            VectorOfGenElements<Particle3d>& generatedPhotons,
-            VectorOfGenElements<FP>& timeAvalanchePhotons,
-            VectorOfGenElements<FP3>& eAvalanchePhotons,
-            VectorOfGenElements<FP3>& bAvalanchePhotons,
+        void oneParticleStep(std::vector<Particle3d>& particles,
+            std::vector<FP3>& ve, std::vector<FP3>& vb,
+            std::vector<FP>& vtime, FP timeStep,
+            std::vector<Particle3d>& generatedPhotons,
+            std::vector<FP>& timeAvalanchePhotons,
+            std::vector<FP3>& eAvalanchePhotons,
+            std::vector<FP3>& bAvalanchePhotons,
             int begin, int size, int auxShift, const int threadId)
         {
             const int end = begin + size;
@@ -425,16 +390,6 @@ namespace pfc
                 }
 
 #pragma ivdep
-#pragma vector always
-                for (int i = 0; i < size; i++) {
-                    rate[i] = (FP)0.0;
-                    if (chi[i] > 0.0 && this->photonEmissionEnabled)
-                    {
-                        rate[i] = compton.rate(chi[i]);
-                    }
-                }
-
-#pragma ivdep
                 for (int i = 0; i < size; i++)  // NOT VECTORIZED: func call (random number)
                     if (chi[i] > 0.0 && this->photonEmissionEnabled)
                         randomNumber[i] = randomNumberOmp(threadId);
@@ -442,9 +397,11 @@ namespace pfc
 #pragma ivdep
 #pragma vector always
                 for (int i = 0; i < size; i++) {
+                    rate[i] = (FP)0.0;
                     dt[i] = (FP)2 * timeStep;
                     if (chi[i] > 0.0 && this->photonEmissionEnabled)
                     {
+                        rate[i] = compton.rate(chi[i]);
                         dt[i] = getDt(rate[i], chi[i], gamma[i], randomNumber[i]);
                     }
                 }
@@ -470,7 +427,10 @@ namespace pfc
 
                 // process other particles
 #pragma ivdep
-#pragma vector always
+                for (int i = 0; i < size; i++)  // NOT VECTORIZED: func call (random number)
+                    randomNumber[i] = randomNumberOmp(threadId);
+
+#pragma omp simd  // omp simd because of inner unrolled loop
                 for (int i = 0; i < size; i++) {
                     FP3 v = particles[s + i].getVelocity();
                     FP H_eff = sqr(ve[sAux + i] + ((FP)1 / Constants<FP>::lightVelocity()) * VP(v, vb[sAux + i]))
@@ -481,16 +441,12 @@ namespace pfc
                     chi_new[i] = gamma * H_eff / this->schwingerField;
                 }
 
-#pragma ivdep
-                for (int i = 0; i < size; i++)  // NOT VECTORIZED: func call (random number)
-                    randomNumber[i] = randomNumberOmp(threadId);
+#pragma omp simd
+                for (int i = 0; i < size; i++) {
+                    delta[i] = photonGenerator((chi[i + elimShift] + chi_new[i]) / (FP)2.0, randomNumber[i]);
+                }
 
 #pragma omp simd
-                for (int i = 0; i < size; i++)
-                    delta[i] = photonGenerator((chi[i + elimShift] + chi_new[i]) / (FP)2.0, randomNumber[i]);
-
-#pragma ivdep
-#pragma vector always
                 for (int i = 0; i < size; i++) {
                     newPhoton[i].setType(Photon);
                     newPhoton[i].setWeight(particles[s + i].getWeight());
@@ -498,34 +454,33 @@ namespace pfc
                     newPhoton[i].setMomentum(delta[i] * particles[s + i].getMomentum());
                 }
 
-                generatedPhotons.reserveAdditional(size);
-                timeAvalanchePhotons.reserveAdditional(size);
-                eAvalanchePhotons.reserveAdditional(size);
-                bAvalanchePhotons.reserveAdditional(size);
-#pragma ivdep
-#pragma vector always
+                int n = generatedPhotons.size();
+                generatedPhotons.resize(n + size);
+                timeAvalanchePhotons.resize(n + size);
+                eAvalanchePhotons.resize(n + size);
+                bAvalanchePhotons.resize(n + size);
+#pragma omp simd
                 for (int i = 0; i < size; i++) {
-                    generatedPhotons.push_back_reserved(newPhoton[i]);
-                    timeAvalanchePhotons.push_back_reserved(vtime[sAux + i]);
-                    eAvalanchePhotons.push_back_reserved(ve[sAux + i]);
-                    bAvalanchePhotons.push_back_reserved(vb[sAux + i]);
+                    generatedPhotons[n + i] = newPhoton[i];
+                    timeAvalanchePhotons[n + i] = vtime[i + sAux];
+                    eAvalanchePhotons[n + i] = ve[i + sAux];
+                    bAvalanchePhotons[n + i] = vb[i + sAux];
                 }
 
-#pragma ivdep
-#pragma vector always
+#pragma omp simd
                 for (int i = 0; i < size; i++) {
                     particles[s + i].setMomentum(((FP)1 - delta[i]) * particles[s + i].getMomentum());
                 }
             }
         }
 
-        void onePhotonStep(VectorOfGenElements<Particle3d>& photons,
-            VectorOfGenElements<FP3>& ve, VectorOfGenElements<FP3>& vb,
-            VectorOfGenElements<FP>& vtime, FP timeStep,
-            VectorOfGenElements<Particle3d>& generatedParticles,
-            VectorOfGenElements<FP>& timeAvalancheParticles,
-            VectorOfGenElements<FP3>& eAvalancheParticles,
-            VectorOfGenElements<FP3>& bAvalancheParticles,
+        void onePhotonStep(std::vector<Particle3d>& photons,
+            std::vector<FP3>& ve, std::vector<FP3>& vb,
+            std::vector<FP>& vtime, FP timeStep,
+            std::vector<Particle3d>& generatedParticles,
+            std::vector<FP>& timeAvalancheParticles,
+            std::vector<FP3>& eAvalancheParticles,
+            std::vector<FP3>& bAvalancheParticles,
             int begin, int size, int auxShift, const int threadId)
         {
             FP3 k_[chunkSize];
@@ -548,16 +503,6 @@ namespace pfc
             }
 
 #pragma ivdep
-#pragma vector always
-            for (int i = 0; i < size; i++) {
-                rate[i] = 0.0;
-                if (chi[i] > 0.0 && this->pairProductionEnabled)
-                {
-                    rate[i] = breit_wheeler.rate(chi[i]);
-                }
-            }
-
-//#pragma ivdep
             for (int i = 0; i < size; i++)  // NOT VECTORIZED: func call (random number)
                 if (chi[i] > 0.0 && this->pairProductionEnabled)
                     randomNumber[i] = randomNumberOmp(threadId);
@@ -565,9 +510,11 @@ namespace pfc
 #pragma ivdep
 #pragma vector always
             for (int i = 0; i < size; i++) {
+                rate[i] = 0.0;
                 dt[i] = (FP)2 * timeStep;
                 if (chi[i] > 0.0 && this->pairProductionEnabled)
                 {
+                    rate[i] = breit_wheeler.rate(chi[i]);
                     dt[i] = getDt(rate[i], chi[i], gamma[i], randomNumber[i]);
                 }
             }
@@ -602,8 +549,7 @@ namespace pfc
                 delta[i] = pairGenerator(chi[i + elimShift], randomNumber[i]);  // unrolled inner loop
             }
 
-#pragma ivdep
-#pragma vector always
+#pragma omp simd
             for (int i = 0; i < size; i++) {
                 newParticle[i].setType(Electron);
                 newParticle[i].setWeight(photons[s + i].getWeight());
@@ -611,34 +557,41 @@ namespace pfc
                 newParticle[i].setMomentum(delta[i] * photons[s + i].getMomentum());
             }
 
-            generatedParticles.reserveAdditional(2 * size);
-            timeAvalancheParticles.reserveAdditional(2 * size);
-            eAvalancheParticles.reserveAdditional(2 * size);
-            bAvalancheParticles.reserveAdditional(2 * size);
-
-#pragma ivdep
-#pragma vector always
+            int n = generatedParticles.size();
+            generatedParticles.resize(n + size);
+            timeAvalancheParticles.resize(n + size);
+            eAvalancheParticles.resize(n + size);
+            bAvalancheParticles.resize(n + size);
+#pragma omp simd
             for (int i = 0; i < size; i++) {
-                generatedParticles.push_back_reserved(newParticle[i]);
-                timeAvalancheParticles.push_back_reserved(vtime[sAux + i]);
-                eAvalancheParticles.push_back_reserved(ve[sAux + i]);
-                bAvalancheParticles.push_back_reserved(vb[sAux + i]);
+                generatedParticles[n + i] = newParticle[i];
+                timeAvalancheParticles[n + i] = vtime[i + sAux];
+                eAvalancheParticles[n + i] = ve[i + sAux];
+                bAvalancheParticles[n + i] = vb[i + sAux];
             }
 
-#pragma ivdep
-#pragma vector always
+#pragma omp simd
             for (int i = 0; i < size; i++) {
                 newParticle[i].setType(Positron);
                 newParticle[i].setMomentum(((FP)1 - delta[i]) * photons[s + i].getMomentum());
             }
 
-#pragma ivdep
-#pragma vector always
+            n = generatedParticles.size();
+            generatedParticles.resize(n + size);
+            timeAvalancheParticles.resize(n + size);
+            eAvalancheParticles.resize(n + size);
+            bAvalancheParticles.resize(n + size);
+#pragma omp simd
             for (int i = 0; i < size; i++) {
-                generatedParticles.push_back_reserved(newParticle[i]);
-                timeAvalancheParticles.push_back_reserved(vtime[sAux + i]);
-                eAvalancheParticles.push_back_reserved(ve[sAux + i]);
-                bAvalancheParticles.push_back_reserved(vb[sAux + i]);
+                generatedParticles[n + i] = newParticle[i];
+                timeAvalancheParticles[n + i] = vtime[i + sAux];
+                eAvalancheParticles[n + i] = ve[i + sAux];
+                bAvalancheParticles[n + i] = vb[i + sAux];
+            }
+
+#pragma omp simd
+            for (int i = 0; i < size; i++) {
+                vtime[sAux + i] = timeStep;
             }
 
 #pragma ivdep
@@ -647,16 +600,10 @@ namespace pfc
                 // mark old photon as deleted
                 photons[s + i].setP(Particle3d::MomentumType());  // there is a function call here because of zero arg
             }
-
-#pragma ivdep
-#pragma vector always
-            for (int i = 0; i < size; i++) {
-                vtime[sAux + i] = timeStep;
-            }
         }
 
-        forceinline int sortHandledParticles(VectorOfGenElements<Particle3d>& particles, FP timeStep,
-            VectorOfGenElements<FP>& vtime, VectorOfGenElements<FP3>& ve, VectorOfGenElements<FP3>& vb,
+        forceinline int sortHandledParticles(std::vector<Particle3d>& particles, FP timeStep,
+            std::vector<FP>& vtime, std::vector<FP3>& ve, std::vector<FP3>& vb,
             int begin, int end, int auxShift, FP* const chi = nullptr)
         {
             int lastIndex = begin;
@@ -674,7 +621,7 @@ namespace pfc
             return lastIndex;
         }
 
-        forceinline void removeNonPhysicalPhotons(VectorOfGenElements<Particle3d>& generatedPhotons,
+        forceinline void removeNonPhysicalPhotons(std::vector<Particle3d>& generatedPhotons,
             int prevGeneratedPhotonsSize)
         {
             int lastIndex = prevGeneratedPhotonsSize;
@@ -684,11 +631,11 @@ namespace pfc
                         std::swap(generatedPhotons[k], generatedPhotons[lastIndex]);
                     lastIndex++;
                 }
-            generatedPhotons.decrease(lastIndex);
+            generatedPhotons.resize(lastIndex);
         }
 
         forceinline void removeDoubleParticles(ParticleArray3d& particles,
-            VectorOfGenElements<Particle3d>& generatedParticles,
+            std::vector<Particle3d>& generatedParticles,
             int begin1, int begin2, int size)
         {
             // replace old particles with new particles
@@ -700,7 +647,7 @@ namespace pfc
             for (int j = 0; j < nMove; j++)
                 std::swap(generatedParticles[j + begin2],
                     generatedParticles[generatedParticles.size() - nMove + j]);
-            generatedParticles.decrease(generatedParticles.size() - size);
+            generatedParticles.resize(generatedParticles.size() - size);
         }
 
         //forceinline FP getDt(FP rate, FP chi, FP gamma)
@@ -758,12 +705,6 @@ namespace pfc
         Breit_wheeler breit_wheeler;
 
     private:
-
-        //forceinline FP randomNumberOmp()
-        //{
-        //    int threadId = OMP_GET_THREAD_NUM();
-        //    return distribution[threadId](randGenerator[threadId]);
-        //}
 
         forceinline FP randomNumberOmp(const int threadId)
         {

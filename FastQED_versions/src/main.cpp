@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <fstream>
+#include <random>
 
 // !!!!!!!!!!!!!
 namespace pfc {
@@ -179,14 +180,6 @@ OMP_FOR()
             particles.deleteParticle(deletedParticles[thr][i]);
 }
 
-//void removeNonPhysicalPhotons(Ensemble3d& ensemble, FP threshold) {
-//    ParticleArray3d& particles = ensemble[ParticleTypes::Photon];
-//
-//    for (auto it = particles.begin(); it != particles.end(); it++)
-//        if ((*it).getMomentum().norm() * constants::c < threshold)
-//            particles.deleteParticle(it);
-//}
-
 
 void startThinning(Ensemble3d& ensemble, std::vector<int> limits,
     Thinning<ParticleArray3d>& thinning) {
@@ -249,8 +242,8 @@ int main() {
 
     const FP RemovePhotonsBelow = 2.0 * constants::electronMass * constants::c * constants::c;
 
-    const int IterationsNumber = int(__ITER_NUM__); // 61, 1001, 5 * StepsPerPeriod + 1; // 
-    const int BOIterationPass = StepsPerPeriod / 20;
+    const int IterationsNumber = int(__ITER_NUM__); // 61, 1001 = 5 * StepsPerPeriod + 1;
+    const int BOIterationPass = int(__ITER_DUMP__); // 10 = StepsPerPeriod / 20;
 
     Int3 gridSize(MatrixSize_X, MatrixSize_Y, MatrixSize_Z);
     FP3 minCoords(PlasmaXMin, PlasmaYMin, PlasmaZMin);
@@ -322,9 +315,16 @@ int main() {
     const int thinningLimit = 1000000;
     std::vector<int> thinningLimits(sizeParticleTypes, thinningLimit);
 
-    //ScalarQED_AEG_Analytical qed;
+#ifndef __RAND_SEED__
     Scalar_Fast_QED_Analytical qed;
-
+#else 
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<unsigned int> seedDistr;
+    unsigned int seed = seedDistr(gen);
+    std::cout << "seed = " << seed << std::endl;
+    Scalar_Fast_QED_Analytical qed(seed);
+#endif
     // -------- output --------
 
     Output output(gridSize, minCoords, maxCoords);

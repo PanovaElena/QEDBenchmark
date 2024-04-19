@@ -14,6 +14,10 @@
 #include <omp.h>
 #include <random>
 
+///
+/// Getting rid of small intermediate particle vectors
+/// 
+
 using namespace constants;
 namespace pfc
 {
@@ -22,13 +26,11 @@ namespace pfc
     {
     public:
 
-        static const int chunkSize = 8;
-
         template <class T>
         struct VectorOfGenElements {
             static const int factor = 2;
 
-            int n = 0, capacity = chunkSize;
+            int n = 0, capacity = 8;
             std::vector<T> data;
 
             VectorOfGenElements() : data(capacity) {}
@@ -45,8 +47,8 @@ namespace pfc
                 data.resize(newCapacity);
                 capacity = newCapacity;
             }
-            forceinline void reserveAdditional(int size) {  // size <= chunkSize
-                if (n + size >= capacity) increaseCapacity(factor * capacity);
+            forceinline void reserveAdditional(int size) {
+                while (n + size >= capacity) increaseCapacity(factor * capacity);
             }
 
             forceinline void push_back(const T& value) {
@@ -155,85 +157,17 @@ namespace pfc
             std::vector<VectorOfGenElements<FP>> timeAvalancheParticlesThread(maxThreads);
             std::vector<VectorOfGenElements<FP>> timeAvalanchePhotonsThread(maxThreads);
 
-            const int n = photons.size();
-            if (n == 0) return;
-            const int nChunks = n / chunkSize;
-            const int chunkRem = n - nChunks * chunkSize;
-
 #pragma omp parallel for
-            for (int chunkNum = 0; chunkNum < nChunks; chunkNum++)
-            {
-                int threadId = OMP_GET_THREAD_NUM();
-
-                const int begin = chunkNum * chunkSize;
-                const int end = begin + chunkSize;
-
-                handlePhotonChunk(photons, ve, vb, timeStep,
-                    generatedParticlesThread[threadId], generatedPhotonsThread[threadId],
-                    timeAvalancheParticlesThread[threadId], timeAvalanchePhotonsThread[threadId],
-                    begin, end
-                );
-            }
-
-            handlePhotonChunk(photons, ve, vb, timeStep,
-                generatedParticlesThread[0], generatedPhotonsThread[0],
-                timeAvalancheParticlesThread[0], timeAvalanchePhotonsThread[0],
-                n - chunkRem, n
-            );
-        }
-
-        void handleParticles(ParticleArray3d& particles,
-            const std::vector<FP3>& ve, const std::vector<FP3>& vb, FP timeStep,
-            std::vector<VectorOfGenElements<Particle3d>>& generatedParticlesThread,
-            std::vector<VectorOfGenElements<Particle3d>>& generatedPhotonsThread)
-        {
-            int maxThreads = OMP_GET_MAX_THREADS();
-
-            std::vector<VectorOfGenElements<FP>> timeAvalancheParticlesThread(maxThreads);
-            std::vector<VectorOfGenElements<FP>> timeAvalanchePhotonsThread(maxThreads);
-
-            const int n = particles.size();
-            if (n == 0) return;
-            const int nChunks = n / chunkSize;
-            const int chunkRem = n - nChunks * chunkSize;
-
-#pragma omp parallel for
-            for (int chunkNum = 0; chunkNum < nChunks; chunkNum++)
-            {
-                int threadId = OMP_GET_THREAD_NUM();
-
-                const int begin = chunkNum * chunkSize;
-                const int end = begin + chunkSize;
-
-                handleParticleChunk(particles, ve, vb, timeStep,
-                    generatedParticlesThread[threadId], generatedPhotonsThread[threadId],
-                    timeAvalancheParticlesThread[threadId], timeAvalanchePhotonsThread[threadId],
-                    begin, end
-                );
-            }
-
-            handleParticleChunk(particles, ve, vb, timeStep,
-                generatedParticlesThread[0], generatedPhotonsThread[0],
-                timeAvalancheParticlesThread[0], timeAvalanchePhotonsThread[0],
-                n - chunkRem, n
-            );
-        }
-
-        forceinline void handlePhotonChunk(ParticleArray3d& photons,
-            const std::vector<FP3>& ve, const std::vector<FP3>& vb, FP timeStep,
-            VectorOfGenElements<Particle3d>& generatedParticles,
-            VectorOfGenElements<Particle3d>& generatedPhotons,
-            VectorOfGenElements<FP>& timeAvalancheParticles,
-            VectorOfGenElements<FP>& timeAvalanchePhotons,
-            const int begin, const int end
-            )
-        {
-            int prevGeneratedParticlesSize = generatedParticles.size();
-            int prevGeneratedPhotonsSize = generatedPhotons.size();
-
-            for (int i = begin; i < end; i++)
+            for (int i = 0; i < photons.size(); i++)
             {
                 FP3 e = ve[i], b = vb[i];
+
+                int threadId = OMP_GET_THREAD_NUM();
+
+                VectorOfGenElements<FP>& timeAvalancheParticles = timeAvalancheParticlesThread[threadId];
+                VectorOfGenElements<FP>& timeAvalanchePhotons = timeAvalanchePhotonsThread[threadId];
+                VectorOfGenElements<Particle3d>& generatedParticles = generatedParticlesThread[threadId];
+                VectorOfGenElements<Particle3d>& generatedPhotons = generatedPhotonsThread[threadId];
 
                 int prevGeneratedParticlesSize = generatedParticles.size();
                 int prevGeneratedPhotonsSize = generatedPhotons.size();
@@ -247,29 +181,35 @@ namespace pfc
                     generatedPhotons, timeAvalanchePhotons,
                     prevGeneratedParticlesSize, prevGeneratedPhotonsSize);
 
+                // pop non-physical photons
+                removeNonPhysicalPhotons(generatedPhotons, prevGeneratedPhotonsSize);
+
                 timeAvalancheParticles.clear();
                 timeAvalanchePhotons.clear();
             }
-
-            // pop non-physical photons
-            removeNonPhysicalPhotons(generatedPhotons, prevGeneratedPhotonsSize);
         }
 
-        forceinline void handleParticleChunk(ParticleArray3d& particles,
+        void handleParticles(ParticleArray3d& particles,
             const std::vector<FP3>& ve, const std::vector<FP3>& vb, FP timeStep,
-            VectorOfGenElements<Particle3d>& generatedParticles,
-            VectorOfGenElements<Particle3d>& generatedPhotons,
-            VectorOfGenElements<FP>& timeAvalancheParticles,
-            VectorOfGenElements<FP>& timeAvalanchePhotons,
-            const int begin, const int end
-        )
+            std::vector<VectorOfGenElements<Particle3d>>& generatedParticlesThread,
+            std::vector<VectorOfGenElements<Particle3d>>& generatedPhotonsThread)
         {
-            int prevGeneratedParticlesSize = generatedParticles.size();
-            int prevGeneratedPhotonsSize = generatedPhotons.size();
+            int maxThreads = OMP_GET_MAX_THREADS();
 
-            for (int i = begin; i < end; i++)
+            std::vector<VectorOfGenElements<FP>> timeAvalancheParticlesThread(maxThreads);
+            std::vector<VectorOfGenElements<FP>> timeAvalanchePhotonsThread(maxThreads);
+
+#pragma omp parallel for
+            for (int i = 0; i < particles.size(); i++)
             {
                 FP3 e = ve[i], b = vb[i];
+
+                int threadId = OMP_GET_THREAD_NUM();
+
+                VectorOfGenElements<FP>& timeAvalancheParticles = timeAvalancheParticlesThread[threadId];
+                VectorOfGenElements<FP>& timeAvalanchePhotons = timeAvalanchePhotonsThread[threadId];
+                VectorOfGenElements<Particle3d>& generatedParticles = generatedParticlesThread[threadId];
+                VectorOfGenElements<Particle3d>& generatedPhotons = generatedPhotonsThread[threadId];
 
                 int prevGeneratedParticlesSize = generatedParticles.size();
                 int prevGeneratedPhotonsSize = generatedPhotons.size();
@@ -283,15 +223,14 @@ namespace pfc
                     generatedPhotons, timeAvalanchePhotons,
                     prevGeneratedParticlesSize, prevGeneratedPhotonsSize);
 
+                // pop non-physical photons
+                removeNonPhysicalPhotons(generatedPhotons, prevGeneratedPhotonsSize);
                 // pop double particle
                 removeDoubleParticles(particles, generatedParticles, i, prevGeneratedParticlesSize);
 
                 timeAvalancheParticles.clear();
                 timeAvalanchePhotons.clear();
             }
-
-            // pop non-physical photons
-            removeNonPhysicalPhotons(generatedPhotons, prevGeneratedPhotonsSize);
         }
 
         void runAvalanche(const FP3& e, const FP3& b, FP timeStep,
@@ -371,7 +310,6 @@ namespace pfc
 
                     generatedPhotons.push_back(newPhoton);
                     timeAvalanchePhotons.push_back(time);
-
                     particle.setMomentum(((FP)1 - delta) * particle.getMomentum());
                 }
             }
@@ -418,7 +356,6 @@ namespace pfc
 
                 newParticle.setType(Positron);
                 newParticle.setMomentum(((FP)1 - delta) * photon.getMomentum());
-
                 generatedParticles.push_back(newParticle);
                 timeAvalancheParticles.push_back(time);
 
@@ -447,7 +384,7 @@ namespace pfc
             // save new position and momentum of the current particle
             particles[i1] = generatedParticles[i2];
             // pop double particle
-            std::swap(generatedParticles[i2], generatedParticles[generatedParticles.size()-1]);
+            std::swap(generatedParticles[i2], generatedParticles[generatedParticles.size() - 1]);
             generatedParticles.pop_back();
         }
 

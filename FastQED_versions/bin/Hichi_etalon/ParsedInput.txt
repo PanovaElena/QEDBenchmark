@@ -10,7 +10,8 @@ Setting variable: Amp=1100
 Setting variable: k=78539.816339744822471402585506439208984375
 Setting variable: StepsPerPeriod=200
 Setting variable: TimeStep=0.0000000000000000133425638079260829967149
-Setting variable: IterationsNumber=2
+Setting variable: IterationsNumber=1001
+Setting variable: BOIterationPass=10
 Setting variable: RSize=0.0000800000000000000065442443131225047637
 Setting variable: X_Min=-0.0000400000000000000032721221565612523818
 Setting variable: X_Max=0.0000400000000000000032721221565612523818
@@ -68,11 +69,12 @@ Setting module: Module-'ParticleBC'
 Setting string: ParticleBC.x=periodic
 Setting string: ParticleBC.y=periodic
 Setting string: ParticleBC.z=periodic
-Setting module: Module-'QED_AdaptiveEventGenerator'
-Setting variable: QED_AdaptiveEventGenerator.DomainResamplingThreshold=-1
-Setting variable: QED_AdaptiveEventGenerator.CellResamplingThreshold=-1
-Setting variable: QED_AdaptiveEventGenerator.IterationResamplingThreshold=-1
-Setting variable: QED_AdaptiveEventGenerator.RemovePhotonsBelow=0.0000016374208764810453717688295410814803
+Setting module: Module-'Fast_QED'
+Setting variable: Fast_QED.DomainResamplingThreshold=-1
+Setting variable: Fast_QED.CellResamplingThreshold=-1
+Setting variable: Fast_QED.IterationResamplingThreshold=-1
+Setting variable: Fast_QED.RemovePhotonsBelow=0.0000016374208764810453717688295410814803
+Setting string: Fast_QED.Estimated=new
 Setting module: ParticleThinout-'ParticleThinoutElectron'
 Setting string: ParticleThinoutElectron.type=Electron
 Setting variable: ParticleThinoutElectron.limit=1000000
@@ -85,7 +87,6 @@ Setting variable: ParticleThinoutPhoton.limit=1000000
 Setting variable: IfBasicOutputIsNeeded=1
 Setting variable: IfBOPicsIsNeeded=1
 Setting variable: IfBODataIsNeeded=1
-Setting variable: BOIterationPass=1
 Setting variable: BOWidth=800
 Setting variable: BOHeight=640
 Setting string: BODataFormat=txt
@@ -262,7 +263,7 @@ Setting variable: PhotonEnergy1Dx.SetMatrixSize_0=128
 Setting variable: PhotonEnergy1Dx.SetBounds_0=-0.0000400000000000000032721221565612523818
 Setting variable: PhotonEnergy1Dx.SetBounds_1=0.0000400000000000000032721221565612523818
 Setting function: PhotonEnergy1Dx.x=x
-Setting function: PhotonEnergy1Dx.Weight=(249999999999999.9375 * (0.0000000000006702867816839886329759256297 + ((((px * px) + (py * py)) + (pz * pz)) * 898755178736817668096)))
+Setting function: PhotonEnergy1Dx.Weight=(249999999999999.9375 * sqrt((0.0000000000006702867816839886329759256297 + ((((px * px) + (py * py)) + (pz * pz)) * 898755178736817668096))))
 Setting variable: PhotonEnergy1Dx.SetPosition_0=2
 Setting variable: PhotonEnergy1Dx.SetPosition_1=2
 Setting variable: PhotonEnergy1Dx.SetPosition_2=3
@@ -271,7 +272,7 @@ Setting string: PhotonEnergy1Dx.Color=BbcyrR
 List of common variables:
 Amp = 1100
 BOHeight = 640
-BOIterationPass = 1
+BOIterationPass = 10
 BOWidth = 800
 CellVol = 2.5e-16
 Density = 1
@@ -280,7 +281,7 @@ ElectronMass = 9.10938e-28
 IfBODataIsNeeded = 1
 IfBOPicsIsNeeded = 1
 IfBasicOutputIsNeeded = 1
-IterationsNumber = 2
+IterationsNumber = 1001
 LightVelocity = 2.99792e+10
 MatrixSize_X = 128
 MatrixSize_Y = 4
@@ -458,16 +459,16 @@ Ez1D.dim = 1
 
 Module(CurrentDeposition)
 
+Module(Fast_QED)
+Fast_QED.CellResamplingThreshold = -1
+Fast_QED.DomainResamplingThreshold = -1
+Fast_QED.IterationResamplingThreshold = -1
+Fast_QED.RemovePhotonsBelow = 1.63742e-06
+
 Module(ParticleBC)
 
 Module(PresetFields)
 PresetFields.replaceInterpolation = 0
-
-Module(QED_AdaptiveEventGenerator)
-QED_AdaptiveEventGenerator.CellResamplingThreshold = -1
-QED_AdaptiveEventGenerator.DomainResamplingThreshold = -1
-QED_AdaptiveEventGenerator.IterationResamplingThreshold = -1
-QED_AdaptiveEventGenerator.RemovePhotonsBelow = 1.63742e-06
 
 ParticleThinout(ParticleThinoutElectron)
 ParticleThinoutElectron.limit = 1e+06
@@ -554,7 +555,7 @@ Photon1Dx.x(x, y, z, px, py, pz) = x
 
 BO_Density(PhotonEnergy1Dx)
 PhotonEnergy1Dx.Color = 'BbcyrR'
-PhotonEnergy1Dx.Weight(x, y, z, px, py, pz) = (249999999999999.9375 * (0.0000000000006702867816839886329759256297 + ((((px * px) + (py * py)) + (pz * pz)) * 898755178736817668096)))
+PhotonEnergy1Dx.Weight(x, y, z, px, py, pz) = (249999999999999.9375 * sqrt((0.0000000000006702867816839886329759256297 + ((((px * px) + (py * py)) + (pz * pz)) * 898755178736817668096))))
 PhotonEnergy1Dx.type = 'Photon'
 PhotonEnergy1Dx.x(x, y, z, px, py, pz) = x
 
@@ -595,6 +596,9 @@ Ez1D.Z(x) = 0
 Module(CurrentDeposition)
 CurrentDeposition.type = 'Disabled'
 
+Module(Fast_QED)
+Fast_QED.Estimated = 'new'
+
 Module(ParticleBC)
 ParticleBC.x = 'periodic'
 ParticleBC.y = 'periodic'
@@ -607,8 +611,6 @@ PresetFields.Bz(x, y, z, t) = ((-147258996753.696044921875 * sin((78539.81633974
 PresetFields.Ex(x, y, z, t) = 0
 PresetFields.Ey(x, y, z, t) = ((147258996753.696044921875 * cos((78539.816339744822471402585506439208984375 * x))) * sin((2354564459136066 * t)))
 PresetFields.Ez(x, y, z, t) = ((147258996753.696044921875 * cos((78539.816339744822471402585506439208984375 * x))) * cos((2354564459136066 * t)))
-
-Module(QED_AdaptiveEventGenerator)
 
 ParticleThinout(ParticleThinoutElectron)
 ParticleThinoutElectron.type = 'Electron'

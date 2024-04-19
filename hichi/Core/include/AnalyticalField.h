@@ -119,6 +119,16 @@ namespace pfc {
                 this->funcJz(coords.x, coords.y, coords.z, this->globalTime));
         }
 
+        // !!!!!!!!!!!!!!!
+        void getFields(const FP3& coords, FP3& e, FP3& b) const {
+            e = getE(coords);
+            b = getB(coords);
+        }
+        void getFields(FP x, FP y, FP z, FP3& e, FP3& b) const {
+            e = getE(FP3(x, y, z));
+            b = getB(FP3(x, y, z));
+        }
+
         FP getEx(const FP3& coords) const { return this->funcEx(coords.x, coords.y, coords.z, this->globalTime); }
         FP getEy(const FP3& coords) const { return this->funcEy(coords.x, coords.y, coords.z, this->globalTime); }
         FP getEz(const FP3& coords) const { return this->funcEz(coords.x, coords.y, coords.z, this->globalTime); }
